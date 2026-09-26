@@ -1,9 +1,7 @@
 criterion,w_baseline,Fabric,BigQuery,Snowflake,Databricks
 erp_fit,20,3,3,3,3
+etl_tools_fit,15,3,5,5,5
 bi_fit,15,5,3,4,4
-cost_small_scale,20,4,5,4,3
-dbt_support,10,3,5,5,5
-streaming,5,4,4,4,5
-skills_low_ops,15,4,4,5,2
-openness,10,4,3,3,5
-eu_region,5,5,5,5,5
+lakehouse,15,4,3,3,5
+cost,20,4,5,4,3
+ease_for_team,15,4,4,5,2

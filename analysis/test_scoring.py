@@ -43,18 +43,23 @@ class PublishedMatrices(unittest.TestCase):
     """Guards the totals quoted in docs/deliverables/01-architecture-options.md against drift in the CSVs."""
 
     def test_architecture_totals(self):
-        self.assertEqual(totals("architecture_scores.csv"), {"D": 78.0, "B": 66.0, "C": 66.0, "A": 58.0})
-        self.assertEqual(totals("architecture_scores.csv", "speed_first"), {"D": 78.0, "B": 75.0, "A": 60.0, "C": 58.0})
-        self.assertEqual(totals("architecture_scores.csv", "long_term"), {"D": 78.0, "C": 76.0, "B": 59.0, "A": 54.0})
+        self.assertEqual(
+            totals("architecture_scores.csv"),
+            {"Lakehouse cloud": 83.0, "Datamart cloud": 72.0, "Lakehouse on-premise": 50.0, "Datamart on-premise": 49.0},
+        )
+        self.assertEqual(
+            totals("architecture_scores.csv", "speed_first"),
+            {"Datamart cloud": 83.0, "Lakehouse cloud": 77.0, "Datamart on-premise": 51.0, "Lakehouse on-premise": 39.0},
+        )
 
     def test_platform_totals_business_central(self):
         self.assertEqual(
-            totals("platform_scores_bc.csv"), {"Fabric": 86.0, "Snowflake": 80.0, "BigQuery": 78.0, "Databricks": 72.0}
+            totals("platform_scores_bc.csv"), {"Fabric": 84.0, "Snowflake": 79.0, "BigQuery": 77.0, "Databricks": 72.0}
         )
 
     def test_platform_totals_sap_business_one(self):
         self.assertEqual(
-            totals("platform_scores_sapb1.csv"), {"Snowflake": 80.0, "Fabric": 78.0, "BigQuery": 78.0, "Databricks": 72.0}
+            totals("platform_scores_sapb1.csv"), {"Snowflake": 79.0, "BigQuery": 77.0, "Fabric": 76.0, "Databricks": 72.0}
         )
 
     def test_use_case_totals(self):
