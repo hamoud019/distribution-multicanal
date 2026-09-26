@@ -1,0 +1,9 @@
+criterion,w_baseline,w_speed_first,w_long_term,A,B,C,D
+time_to_value,20,35,10,3,5,2,4
+tco_3y,20,20,15,2,3,3,4
+scalability,15,5,25,2,2,5,4
+realtime_pos,5,5,10,2,4,5,4
+gdpr_eu,10,10,10,4,3,4,4
+skills,10,10,5,5,4,2,4
+lock_in,10,5,15,3,2,4,4
+erp_fit,10,10,10,3,3,3,3

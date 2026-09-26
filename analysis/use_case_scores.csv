@@ -1,0 +1,6 @@
+criterion,w_baseline,Sales performance,Customer segmentation,Inventory optimization
+business_value,25,4,4,5
+data_readiness,25,5,2,4
+dependencies,20,5,2,4
+gdpr_exposure,10,5,2,5
+visibility_adoption,20,5,4,3
