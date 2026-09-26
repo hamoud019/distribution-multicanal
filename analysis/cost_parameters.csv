@@ -1,0 +1,4 @@
+name,value,source,note
+usd_per_eur,1.1403,S-ECB,ECB euro reference rate of 25 Sep 2026
+revenue_eur,60000000,ASSUMPTION,Reference retailer (Part 1 section 2): ~30 stores + webshop
+inventory_distortion_pct,6.5,S-IHL,Out-of-stocks + overstocks as share of retail sales (IHL 2025)

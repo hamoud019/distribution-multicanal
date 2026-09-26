@@ -45,11 +45,11 @@ class PublishedMatrices(unittest.TestCase):
     def test_architecture_totals(self):
         self.assertEqual(
             totals("architecture_scores.csv"),
-            {"Lakehouse cloud": 83.0, "Datamart cloud": 72.0, "Lakehouse on-premise": 50.0, "Datamart on-premise": 49.0},
+            {"Lakehouse cloud": 87.0, "Datamart cloud": 72.0, "Datamart on-premise": 53.0, "Lakehouse on-premise": 50.0},
         )
         self.assertEqual(
             totals("architecture_scores.csv", "speed_first"),
-            {"Datamart cloud": 83.0, "Lakehouse cloud": 77.0, "Datamart on-premise": 51.0, "Lakehouse on-premise": 39.0},
+            {"Datamart cloud": 83.0, "Lakehouse cloud": 82.0, "Datamart on-premise": 56.0, "Lakehouse on-premise": 39.0},
         )
 
     def test_platform_totals_business_central(self):

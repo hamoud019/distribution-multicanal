@@ -57,7 +57,7 @@ def scenarios(path):
 
 
 if __name__ == "__main__":
-    paths = [Path(a) for a in sys.argv[1:]] or sorted(Path(__file__).parent.glob("*.csv"))
+    paths = [Path(a) for a in sys.argv[1:]] or sorted(Path(__file__).parent.glob("*_scores.csv"))
     for path in paths:
         for scenario in scenarios(path):
             print(f"{path.name} [{scenario}]: " + format_ranking(rank(*load_matrix(path, scenario))))

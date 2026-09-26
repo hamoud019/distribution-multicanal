@@ -1,0 +1,52 @@
+option,category,item,unit,unit_price,currency,y1,y2,y3,driver,source
+current,manual,Manual report preparation (analyst time),FTE-year,65250,EUR,1.2,1.2,1.2,staff,S-SAL-DA;S-CHARGES;S-ANACONDA
+datamart_onprem,investment,Server Dell PowerEdge R660,server,23299,USD,1,1,0,hardware,S-DELL
+datamart_onprem,investment,SQL Server 2022 Standard (8 cores = 4 two-core packs),server,15780,USD,1,1,0,hardware,S-SQL
+datamart_onprem,investment,Windows Server 2025 Standard (16 cores),server,1176,USD,1,1,0,hardware,S-WS
+datamart_onprem,investment,Build: server installation,consultant day,600,EUR,10,0,0,build,S-TJM
+datamart_onprem,investment,Build: one datamart per use case (integration redone each time),consultant day,600,EUR,40,40,40,build,S-TJM
+datamart_onprem,investment,Power BI training PL-300 (10 report creators),person,2390,EUR,10,0,0,none,S-PL300
+datamart_onprem,investment,Report-reader workshops,consultant day,600,EUR,3,0,0,none,S-TJM
+datamart_onprem,run,"Airbyte Core (open source, self-hosted)",year,0,EUR,1,1,1,none,S-AIRBYTE
+datamart_onprem,run,Power BI Pro (70 users),user-year,168,USD,70,70,70,bi_users,S-PBI
+datamart_onprem,run,Internal data engineer (servers + pipelines),FTE-year,79750,EUR,0.8,0.8,0.8,staff,S-SAL-DE;S-CHARGES
+datamart_onprem,investment,Migration: load history into each new datamart,consultant day,600,EUR,3,3,3,build,S-TJM
+datamart_onprem,run,dbt Core (open source transformations),year,0,EUR,1,1,1,none,S-DBT
+datamart_onprem,manual,Manual report preparation still needed,FTE-year,65250,EUR,1.0,0.8,0.6,staff,S-SAL-DA;S-CHARGES;S-ANACONDA
+datamart_cloud,investment,Build: cloud setup,consultant day,600,EUR,5,0,0,build,S-TJM
+datamart_cloud,investment,Build: one datamart per use case (integration redone each time),consultant day,600,EUR,35,35,35,build,S-TJM
+datamart_cloud,investment,Power BI training PL-300 (10 report creators),person,2390,EUR,10,0,0,none,S-PL300
+datamart_cloud,investment,Report-reader workshops,consultant day,600,EUR,3,0,0,none,S-TJM
+datamart_cloud,run,Fabric capacity F2 then F4 (1-year reservation),CU-year,1146,USD,2,4,4,data_volume,S-FABRIC
+datamart_cloud,run,OneLake storage (hot; data copied into each mart),GB-month,0.024,USD,3600,9600,18000,data_volume,S-FABRIC
+datamart_cloud,run,Fivetran rows (sales sources loaded again for each mart),million MAR-month,500,USD,2.76,5.52,9.12,data_volume,S-FIVETRAN
+datamart_cloud,run,Fivetran connection base charge,connection-month,5,USD,24,48,120,none,S-FIVETRAN
+datamart_cloud,run,Power BI Pro (70 users),user-year,168,USD,70,70,70,bi_users,S-PBI
+datamart_cloud,run,Internal data engineer (pipelines),FTE-year,79750,EUR,0.5,0.5,0.5,staff,S-SAL-DE;S-CHARGES
+datamart_cloud,investment,Migration: load history into each new datamart (Fivetran initial sync free),consultant day,600,EUR,3,3,3,build,S-TJM;S-FIVETRAN
+datamart_cloud,run,dbt Core (open source transformations),year,0,EUR,1,1,1,none,S-DBT
+datamart_cloud,manual,Manual report preparation still needed,FTE-year,65250,EUR,1.0,0.8,0.6,staff,S-SAL-DA;S-CHARGES;S-ANACONDA
+lakehouse_onprem,investment,Servers Dell PowerEdge R660 (3-node cluster),server,23299,USD,3,0,0,hardware,S-DELL
+lakehouse_onprem,investment,Linux + Apache Spark + Airbyte Core (open source),server,0,EUR,3,0,0,none,S-AIRBYTE
+lakehouse_onprem,investment,Build: cluster installation,consultant day,600,EUR,40,0,0,build,S-TJM
+lakehouse_onprem,investment,Build: one use case on the shared lakehouse,consultant day,600,EUR,35,35,35,build,S-TJM
+lakehouse_onprem,investment,Power BI training PL-300 (10 report creators),person,2390,EUR,10,0,0,none,S-PL300
+lakehouse_onprem,investment,Report-reader workshops,consultant day,600,EUR,3,0,0,none,S-TJM
+lakehouse_onprem,run,Power BI Pro (70 users),user-year,168,USD,70,70,70,bi_users,S-PBI
+lakehouse_onprem,run,Internal data engineers (cluster admin + Spark),FTE-year,79750,EUR,1.5,1.5,1.5,staff,S-SAL-DE;S-CHARGES
+lakehouse_onprem,investment,Migration: load 3 years of POS and ERP history once,consultant day,600,EUR,5,0,0,build,S-TJM
+lakehouse_onprem,run,dbt Core (open source transformations),year,0,EUR,1,1,1,none,S-DBT
+lakehouse_onprem,manual,Manual report preparation still needed (first reports one year later),FTE-year,65250,EUR,1.2,1.0,0.8,staff,S-SAL-DA;S-CHARGES;S-ANACONDA
+lakehouse_cloud,investment,Build: platform setup (layers + governance),consultant day,600,EUR,15,0,0,build,S-TJM
+lakehouse_cloud,investment,Build: one use case on the shared lakehouse,consultant day,600,EUR,30,30,30,build,S-TJM
+lakehouse_cloud,investment,Power BI training PL-300 (10 report creators),person,2390,EUR,10,0,0,none,S-PL300
+lakehouse_cloud,investment,Report-reader workshops,consultant day,600,EUR,3,0,0,none,S-TJM
+lakehouse_cloud,run,Fabric capacity F2 then F4 (1-year reservation),CU-year,1146,USD,2,4,4,data_volume,S-FABRIC
+lakehouse_cloud,run,OneLake storage (hot; data stored once),GB-month,0.024,USD,3600,6000,9600,data_volume,S-FABRIC
+lakehouse_cloud,run,Fivetran rows (each source loaded once),million MAR-month,500,USD,2.76,2.76,3.6,data_volume,S-FIVETRAN
+lakehouse_cloud,run,Fivetran connection base charge,connection-month,5,USD,24,24,72,none,S-FIVETRAN
+lakehouse_cloud,run,Power BI Pro (70 users),user-year,168,USD,70,70,70,bi_users,S-PBI
+lakehouse_cloud,run,Internal data engineer (pipelines),FTE-year,79750,EUR,0.5,0.5,0.5,staff,S-SAL-DE;S-CHARGES
+lakehouse_cloud,investment,Migration: load 3 years of POS and ERP history once (Fivetran initial sync free),consultant day,600,EUR,5,0,0,build,S-TJM;S-FIVETRAN
+lakehouse_cloud,run,dbt Core (open source transformations),year,0,EUR,1,1,1,none,S-DBT
+lakehouse_cloud,manual,Manual report preparation still needed,FTE-year,65250,EUR,1.0,0.8,0.6,staff,S-SAL-DA;S-CHARGES;S-ANACONDA

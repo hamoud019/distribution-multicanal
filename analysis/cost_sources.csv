@@ -1,0 +1,17 @@
+id,what,figure,url,retrieved
+S-ECB,ECB euro foreign exchange reference rate (USD),1 EUR = 1.1403 USD on 25 Sep 2026,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html,2026-09-26
+S-SAL-DE,Data engineer salary France 2026,"Experienced: 46-58 k EUR in regions, 50-65 k EUR in Paris; we use 55 k EUR gross",https://www.jedha.co/formation-data/salaire-data-engineer,2026-09-26
+S-SAL-DA,Data analyst salary France 2026,National median about 45 k EUR gross per year,https://www.top-metiers.fr/salaire-primes-data-analyst,2026-09-26
+S-CHARGES,Employer social charges France 2026,Cadres above the social security ceiling: 45-48 % of gross salary; we use 45 %,https://www.dougs.fr/blog/charges-patronales/,2026-09-26
+S-ANACONDA,Anaconda State of Data Science survey,Data professionals spend 39-45 % of their time loading and cleaning data,https://www.anaconda.com/resources/whitepaper/state-of-data-science-2020,2026-09-26
+S-TJM,Freelance data engineer daily rate France 2026,Average 600 EUR per day,https://www.blogdumoderateur.com/freelance-tech-taux-journaliers-moyens-metier-2026/,2026-09-26
+S-DELL,Dell PowerEdge R660 rack server (Dell US store),Starting at 23298.99 USD,https://www.dell.com/en-us/shop/dell-poweredge-servers/poweredge-r660-rack-server/spd/poweredge-r660/pe_r660_tm_vi_vp_sb,2026-09-26
+S-SQL,SQL Server 2022 Standard licensing,3945 USD per 2-core pack,https://redmondmag.com/articles/2022/11/16/sql-server-2022-every-licensing.aspx,2026-09-26
+S-WS,Windows Server 2025 Standard,About 1176 USD per 16-core licence (US MSRP),https://www.microsoft.com/en-us/windows-server/pricing,2026-09-26
+S-AIRBYTE,Airbyte pricing,Airbyte Core (open source) is free to self-host,https://airbyte.com/pricing,2026-09-26
+S-PBI,Power BI pricing,Pro 14 USD per user per month (paid yearly),https://www.microsoft.com/en-us/power-platform/products/power-bi/pricing,2026-09-26
+S-FABRIC,Azure Retail Prices API: Microsoft Fabric in westeurope,1146 USD per CU per year (1-year reservation); OneLake hot storage 0.024 USD per GB-month,https://prices.azure.com/api/retail/prices?$filter=serviceName eq 'Microsoft Fabric' and armRegionName eq 'westeurope',2026-09-26
+S-FIVETRAN,Fivetran pricing (Standard plan),500 USD per million MAR per month; 5 USD base charge per connection per month; initial syncs are not counted as MAR,https://www.fivetran.com/pricing,2026-09-26
+S-PL300,PLB Power BI PL-300 course (3 days),2390 EUR excl. VAT per person,https://www.plb.fr/formation/power-bi-analyse,2026-09-26
+S-IHL,IHL Group inventory distortion research 2025,Out-of-stocks + overstocks = 6.5 % of global retail sales,https://www.ihlservices.com/news/analyst-corner/2025/09/retail-inventory-crisis-persists-despite-172-billion-in-improvements/,2026-09-26
+S-DBT,dbt Core (dbt Labs),Open source under the Apache 2.0 licence: free to use,https://github.com/dbt-labs/dbt-core,2026-09-26
