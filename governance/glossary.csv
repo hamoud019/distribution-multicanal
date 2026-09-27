@@ -1,0 +1,58 @@
+term,definition,owner
+Date,Calendar day (Europe/Paris time zone) on which an event happened; weeks start on Monday,CFO
+Channel,"Where a sale happens: Web (leslipfrancais.fr on Shopify), Store (own shops) or Wholesale (Carrefour, Monoprix and other resellers)",General management
+Location,"A physical place holding stock or selling: the warehouse/factory, each own store; wholesale customers are not locations",Supply chain director
+Order,"A confirmed purchase: a Shopify order, a store ticket or a wholesale order in the ERP; cancelled orders are excluded",CFO
+Order line,One product (SKU) and its quantity inside an order,CFO
+Wholesale account,"A company that buys to resell (for example one Carrefour hypermarket); not a person, so not in the golden customer",Sales director
+SKU,"Stock keeping unit: one product in one size and one colour, identified by its SKU code (shared by Shopify, POS and ERP)",Supply chain director
+Product,"A model sold in several sizes and colours (for example ""Le Marius"" brief); groups SKUs",E-commerce director
+Category,"Product family: briefs and boxers, socks, pyjamas, T-shirts, accessories",E-commerce director
+Size,Size label of a SKU (XS to XXL for clothing; size ranges for socks),Supply chain director
+Colour,Colour label of a SKU,Supply chain director
+Quantity,Number of units on an order line; negative for returned units,CFO
+Gross revenue,Quantity x unit price excluding VAT before discounts,CFO
+Discount,"Price reduction on an order line excluding VAT (promotion code, sale, wholesale terms)",CFO
+Net revenue,"Gross revenue minus discounts and returns, excluding VAT and shipping fees; the reference figure for sales",CFO
+Unit cost,"Production cost of one unit of a SKU from the ERP (materials + factory labour), excluding VAT",CFO
+Margin,Net revenue minus quantity x unit cost,CFO
+Return,An order line sent back by the customer; counted on the date the return is received,E-commerce director
+Average basket,Net revenue divided by number of orders over a period (63 EUR excl. VAT on the web in 2025),Sales director
+Customer,"A person who has placed at least one Web or Store order, as known in one source tool",Marketing director
+Golden customer,"The single record for one real person after matching all source records (Shopify, Klaviyo, POS, Zendesk)",Marketing director
+Customer key,Pseudonymous identifier of a golden customer; the only customer identifier allowed in the marts,Marketing director
+First order date,Date of the first Web or Store order of a golden customer,Marketing director
+Last order date,Date of the most recent Web or Store order of a golden customer,Marketing director
+Order count,Number of Web and Store orders of a golden customer,Marketing director
+Repeat customer,A golden customer with 2 orders or more (42 % of customers in 2025),Marketing director
+RFM segment,"Group of customers by Recency, Frequency and Monetary value of their orders over the last 24 months",Marketing director
+Marketing consent,"Whether the person may receive marketing emails/SMS: explicit consent, or the CNIL existing-customer exception; withdrawal always wins",DPO
+Age band,"Age grouped in bands (under 25, 25-34, 35-44, 45-54, 55+) instead of birth date",Marketing director
+Region,French department (first 2 digits of the postcode) instead of the full address,Marketing director
+Snapshot date,Date on which a stock level was recorded (one snapshot per week),Supply chain director
+Stock on hand,Units of a SKU physically available at a location on the snapshot date,Supply chain director
+Stock cover,Stock on hand divided by average daily units sold over the last 28 days (all channels); in days,Supply chain director
+Sell-through rate,Units sold over a period divided by (stock at start of period + units received during it),Supply chain director
+Stockout,A SKU with zero stock on hand at a location while it sold at least one unit in the last 28 days,Supply chain director
+Overstock,A SKU whose stock cover is above 180 days,Supply chain director
+Units produced,Units of a SKU finished by the factories during the period (from the ERP),Supply chain director
+Campaign,"One marketing send in Klaviyo (email or SMS) to a list or segment, with a send date",Marketing director
+Recipients,Number of profiles a campaign was sent to,Marketing director
+Open rate,Unique opens divided by delivered messages of a campaign,Marketing director
+Click rate,Unique clicks divided by delivered messages of a campaign,Marketing director
+Attributed revenue,Net revenue of Web orders placed by recipients within 5 days of clicking a campaign,Marketing director
+Session,"A visit to the website measured by Google Analytics 4, only for visitors who accepted analytics cookies",E-commerce director
+Traffic source,"Where a session comes from: organic search, paid search, social, email, direct, other",E-commerce director
+Conversion rate,Web orders divided by sessions over a period,E-commerce director
+Social platform,"Instagram, Facebook or TikTok account of the brand",Marketing director
+Engagement,"Likes + comments + shares + saves on the brand's posts, per platform and day",Marketing director
+Followers,Number of followers of a social account at the end of the day,Marketing director
+Ticket,A customer request in Zendesk (email or chat),Customer service manager
+Ticket category,"Reason of a ticket: delivery, size/exchange, product quality, payment, other",Customer service manager
+First response time,Hours between ticket creation and the first reply from an agent,Customer service manager
+CSAT,Customer satisfaction score given after a ticket is solved (satisfied / not satisfied),Customer service manager
+Sales,"All Web, Store and Wholesale orders with their revenue and margin (the sales mart)",CFO
+Inventory,"Stock levels, stock movements and production of SKUs per location (the inventory mart)",Supply chain director
+Marketing,"Campaigns, website traffic and social media results (the marketing mart)",Marketing director
+Support,Customer service requests and their handling (the support mart),Customer service manager
+Consent rate,"Share of website visitors who accepted analytics cookies in the cookie banner, per day; sessions are only measured for them",DPO

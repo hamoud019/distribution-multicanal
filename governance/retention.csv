@@ -1,0 +1,18 @@
+dataset,lawful_basis,retention,starts_from,source
+shopify.customers,Contract (orders) and legitimate interest (analysis),3 years,last order,CNIL client/prospect guidance
+shopify.orders,Legal obligation (accounting),10 years,end of the financial year,Code de commerce L123-22 (customer identity removed after 3 years)
+shopify.transactions,Legal obligation (accounting),10 years,end of the financial year,Code de commerce L123-22
+klaviyo.profiles,Consent or CNIL existing-customer exception (marketing),3 years,last contact or last order,CNIL client/prospect guidance
+klaviyo.events,Legitimate interest (campaign measurement),3 years,event date,CNIL client/prospect guidance
+klaviyo.campaigns,Legitimate interest,5 years,send date,Our choice: campaign totals are not personal data
+pos.tickets,Legal obligation (accounting); contract for the e-receipt email,10 years (email: 3 years),end of the financial year (email: last order),Code de commerce L123-22; CNIL client guidance
+erp.wholesale_accounts,Contract,5 years,end of the business relationship,Code de commerce L110-4 (5-year commercial limitation period)
+erp.items_stock_production,Legitimate interest,10 years,record date,Not personal data
+erp.employees,Not loaded,not loaded,-,Out of scope
+ga4.daily_traffic,Consent (analytics cookies),25 months,collection date,"Our choice, reusing the CNIL 25-month limit for audience measurement"
+ga4.events,Not loaded,not loaded,-,Only daily totals are loaded
+meta_pixel.events,Not loaded,not loaded,-,Only daily totals are loaded
+social.account_insights,Legitimate interest,5 years,record date,"Our choice: aggregates, not personal data"
+social.comments,Not loaded,not loaded,-,Out of scope
+zendesk.users,Contract and legitimate interest,3 years,last ticket,"Our choice, aligned on the CNIL client guidance"
+zendesk.tickets,Contract and legitimate interest,3 years,ticket closure,"Our choice, aligned on the CNIL client guidance"

@@ -12,6 +12,11 @@ Spec and work breakdown: issue #1.
 | 1 | [Choosing the architecture](docs/deliverables/01-architecture-options.md) | #2 |
 | 2 | [SWOT and risk assessment](docs/deliverables/02-swot-risks.md) | #4 |
 | 3 | [Full costing](docs/deliverables/03-costing.md) | #3 |
+| 6 | [Data governance and GDPR](docs/deliverables/06-governance-gdpr.md) | #5 |
+
+## Governance rules
+
+The glossary, planned report tables, personal-data inventory, retention periods, erasure steps and access model are CSV files in [`governance/`](governance), checked by `analysis/test_governance.py`.
 
 ## Decision matrices
 

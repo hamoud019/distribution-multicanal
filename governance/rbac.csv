@@ -1,0 +1,64 @@
+role,domain,access
+General management,sales,read
+General management,inventory,read
+General management,customer,read
+General management,marketing,read
+General management,support,read
+General management,customer identity,none
+General management,raw layer,none
+Sales / stores / wholesale,sales,read
+Sales / stores / wholesale,inventory,read
+Sales / stores / wholesale,customer,read
+Sales / stores / wholesale,marketing,none
+Sales / stores / wholesale,support,none
+Sales / stores / wholesale,customer identity,none
+Sales / stores / wholesale,raw layer,none
+E-commerce,sales,read
+E-commerce,inventory,read
+E-commerce,customer,read
+E-commerce,marketing,read
+E-commerce,support,read
+E-commerce,customer identity,none
+E-commerce,raw layer,none
+Marketing / CRM,sales,read
+Marketing / CRM,inventory,none
+Marketing / CRM,customer,read
+Marketing / CRM,marketing,read
+Marketing / CRM,support,read
+Marketing / CRM,customer identity,none
+Marketing / CRM,raw layer,none
+Customer service,sales,read
+Customer service,inventory,none
+Customer service,customer,read
+Customer service,marketing,none
+Customer service,support,read
+Customer service,customer identity,none
+Customer service,raw layer,none
+Supply chain / production,sales,read
+Supply chain / production,inventory,read
+Supply chain / production,customer,none
+Supply chain / production,marketing,none
+Supply chain / production,support,none
+Supply chain / production,customer identity,none
+Supply chain / production,raw layer,none
+Finance,sales,read
+Finance,inventory,read
+Finance,customer,none
+Finance,marketing,read
+Finance,support,none
+Finance,customer identity,none
+Finance,raw layer,none
+Data engineer,sales,admin
+Data engineer,inventory,admin
+Data engineer,customer,admin
+Data engineer,marketing,admin
+Data engineer,support,admin
+Data engineer,customer identity,admin
+Data engineer,raw layer,admin
+DPO,sales,none
+DPO,inventory,none
+DPO,customer,read
+DPO,marketing,none
+DPO,support,none
+DPO,customer identity,read
+DPO,raw layer,none

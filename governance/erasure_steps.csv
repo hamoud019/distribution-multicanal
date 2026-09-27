@@ -1,0 +1,13 @@
+step,layer,action,who,when
+1,source,"Receive the request (form or email to the DPO), check the person's identity and log it in the request register",DPO,day 0
+2,source,Find every source record of the person through the golden-customer mapping table (emails and phones of all their records),Data engineer,within 2 days
+3,staging,"Add a hash of the person's emails and phones to the erasure suppression list: staging models filter these people out at every sync, so data re-sent by a source tool never comes back",Data engineer,within 2 days
+4,source,"Delete the person in Klaviyo and Zendesk, and request erasure in Shopify (Shopify completes it after 10 days, or up to 6 months after the last order; orders stay, anonymized)",Customer service manager,within 7 days
+5,raw layer,Delete the person's rows in the raw layer by their source ids,Data engineer,within 7 days
+6,raw layer,Run VACUUM on the affected Delta tables so old file versions holding the data are removed (Delta keeps old versions 7 days by default),Data engineer,within 14 days
+7,staging,Delete the person's row in the golden-customer mapping table and rebuild the customer staging models with dbt,Data engineer,within 14 days
+8,marts,"Rebuild dim_customer; fact rows of the person keep only the anonymous customer key (-1), so sales totals stay correct",Data engineer,within 14 days
+9,BI,Refresh the Power BI semantic models; check that no exported file or report page shows the person (exports contain customer keys only),Data engineer,within 14 days
+10,backups,Platform backups expire after 30 days; the register notes the date when the last backup holding the data disappears,DPO,within 30 days
+11,source,Confirm to the person that the erasure is done (Shopify's delay is explained if it applies) and close the request in the register,DPO,within 1 month (GDPR art. 12(3))
+12,staging,Remove the person from the suppression list once Shopify has completed its erasure,Data engineer,after Shopify confirms (up to 6 months)

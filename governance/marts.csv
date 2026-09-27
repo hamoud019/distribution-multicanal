@@ -1,0 +1,62 @@
+mart,table,column,term
+sales,fct_sales,order_date,Date
+sales,fct_sales,channel,Channel
+sales,fct_sales,location,Location
+sales,fct_sales,order_id,Order
+sales,fct_sales,order_line,Order line
+sales,fct_sales,wholesale_account,Wholesale account
+sales,fct_sales,sku,SKU
+sales,fct_sales,customer_key,Customer key
+sales,fct_sales,quantity,Quantity
+sales,fct_sales,gross_revenue,Gross revenue
+sales,fct_sales,discount,Discount
+sales,fct_sales,net_revenue,Net revenue
+sales,fct_sales,margin,Margin
+sales,fct_sales,is_return,Return
+sales,dim_product,sku,SKU
+sales,dim_product,product,Product
+sales,dim_product,category,Category
+sales,dim_product,size,Size
+sales,dim_product,colour,Colour
+sales,dim_product,unit_cost,Unit cost
+customer,dim_customer,customer_key,Customer key
+customer,dim_customer,first_order_date,First order date
+customer,dim_customer,last_order_date,Last order date
+customer,dim_customer,order_count,Order count
+customer,dim_customer,is_repeat_customer,Repeat customer
+customer,dim_customer,rfm_segment,RFM segment
+customer,dim_customer,marketing_consent,Marketing consent
+customer,dim_customer,age_band,Age band
+customer,dim_customer,region,Region
+inventory,fct_stock_snapshot,snapshot_date,Snapshot date
+inventory,fct_stock_snapshot,location,Location
+inventory,fct_stock_snapshot,sku,SKU
+inventory,fct_stock_snapshot,stock_on_hand,Stock on hand
+inventory,fct_stock_snapshot,stock_cover_days,Stock cover
+inventory,fct_stock_snapshot,sell_through_rate,Sell-through rate
+inventory,fct_stock_snapshot,is_stockout,Stockout
+inventory,fct_stock_snapshot,is_overstock,Overstock
+inventory,fct_production,production_date,Date
+inventory,fct_production,sku,SKU
+inventory,fct_production,units_produced,Units produced
+marketing,fct_campaign,send_date,Date
+marketing,fct_campaign,campaign,Campaign
+marketing,fct_campaign,recipients,Recipients
+marketing,fct_campaign,open_rate,Open rate
+marketing,fct_campaign,click_rate,Click rate
+marketing,fct_campaign,attributed_revenue,Attributed revenue
+marketing,fct_web_daily,date,Date
+marketing,fct_web_daily,traffic_source,Traffic source
+marketing,fct_web_daily,sessions,Session
+marketing,fct_web_daily,conversion_rate,Conversion rate
+marketing,fct_web_daily,consent_rate,Consent rate
+marketing,fct_social_daily,date,Date
+marketing,fct_social_daily,platform,Social platform
+marketing,fct_social_daily,engagement,Engagement
+marketing,fct_social_daily,followers,Followers
+support,fct_ticket,created_date,Date
+support,fct_ticket,ticket_id,Ticket
+support,fct_ticket,customer_key,Customer key
+support,fct_ticket,ticket_category,Ticket category
+support,fct_ticket,first_response_hours,First response time
+support,fct_ticket,csat,CSAT

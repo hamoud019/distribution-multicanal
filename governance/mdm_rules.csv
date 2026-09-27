@@ -1,0 +1,13 @@
+kind,rank,rule,detail
+match,1,Same normalized email,"Lower-case, trim spaces; exact match across Shopify, Klaviyo, POS e-receipts and Zendesk; merge automatically"
+match,2,Same normalized phone,Converted to international format (+33...); exact match; merge automatically
+match,3,Same source id link,"When a tool stores another tool's id (for example a Klaviyo profile synced from Shopify with the Shopify customer id), merge automatically"
+match,4,Same last name + first name + postcode,"Never merged automatically: sent to the CRM manager for review (two people can share a name, a family can share an address)"
+survivorship,1,Email,"Most recent email used in a Shopify order, else most recent in Klaviyo"
+survivorship,2,Phone,Most recently updated phone across all sources
+survivorship,3,Name,"Shopify account name, else Klaviyo"
+survivorship,4,Region,Department of the shipping postcode of the most recent Web order
+survivorship,5,Age band,Klaviyo birthday if given; otherwise unknown
+survivorship,6,Marketing consent,Most recent consent event in Klaviyo or Shopify; a withdrawal (unsubscribe) always wins over an older consent
+quality,1,Match rate target,At least 90 % of Klaviyo profiles with an order are matched to a Shopify customer before segmentation starts (risk R02 / M-TRF-2)
+quality,2,Review queue,Rule-4 candidates are reviewed every week; the queue must stay under 200 pairs

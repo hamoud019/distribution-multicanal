@@ -1,0 +1,39 @@
+source,tool,dataset,field,category,treatment,note
+E-commerce,Shopify,shopify.customers,id,identifier,pseudonymize,Replaced by the customer key after matching
+E-commerce,Shopify,shopify.customers,email,contact,restrict,Kept in the raw layer only for matching and erasure
+E-commerce,Shopify,shopify.customers,phone,contact,restrict,Kept in the raw layer only for matching and erasure
+E-commerce,Shopify,shopify.customers,first_name / last_name,identity,restrict,Never copied to the marts
+E-commerce,Shopify,shopify.customers,default_address,contact,restrict,Street and city never leave the raw layer
+E-commerce,Shopify,shopify.customers,address postcode,location,generalize,Reduced to the department (region)
+E-commerce,Shopify,shopify.customers,email_marketing_consent,consent,keep,Needed to respect consent
+E-commerce,Shopify,shopify.orders,browser_ip,online identifier,drop,Not loaded: no analytical need
+E-commerce,Shopify,shopify.orders,note,free text,drop,Not loaded: free text may contain anything
+E-commerce,Shopify,shopify.orders,shipping_address,contact,restrict,Only the postcode department is derived
+E-commerce,Shopify,shopify.orders,line items / totals,transaction,keep,Linked to the customer key only
+E-commerce,Shopify,shopify.transactions,payment card details,payment,drop,Not loaded (Shopify only exposes masked data anyway)
+CRM,Klaviyo,klaviyo.profiles,id,identifier,pseudonymize,Replaced by the customer key after matching
+CRM,Klaviyo,klaviyo.profiles,email,contact,restrict,Raw layer only
+CRM,Klaviyo,klaviyo.profiles,phone_number,contact,restrict,Raw layer only
+CRM,Klaviyo,klaviyo.profiles,first_name / last_name,identity,restrict,Never copied to the marts
+CRM,Klaviyo,klaviyo.profiles,location (city),location,generalize,Reduced to the department
+CRM,Klaviyo,klaviyo.profiles,birthday,demographic,generalize,Reduced to an age band
+CRM,Klaviyo,klaviyo.profiles,email / SMS consent,consent,keep,Source of truth for marketing consent
+CRM,Klaviyo,klaviyo.events,opened / clicked email,behaviour,keep,Linked to the customer key only
+CRM,Klaviyo,klaviyo.campaigns,campaign name / send date,business,keep,Not personal data
+POS,Store tills,pos.tickets,ticket id / lines / totals,transaction,keep,Anonymous unless the customer gives an email
+POS,Store tills,pos.tickets,customer email (e-receipt),contact,restrict,Used only to match the ticket to a golden customer
+POS,Store tills,pos.tickets,payment card details,payment,drop,Not loaded
+POS,Store tills,pos.tickets,cashier name,identity,drop,Employee data: not needed
+ERP,Business Central,erp.wholesale_accounts,company name / SIRET,business,keep,A company is not a person
+ERP,Business Central,erp.wholesale_accounts,buyer contact name / email,contact,restrict,A person at Carrefour/Monoprix: raw layer only
+ERP,Business Central,erp.items_stock_production,SKU / quantities / costs,business,keep,Not personal data
+ERP,Business Central,erp.employees,payroll / HR data,identity,drop,Out of scope: never loaded
+Web analytics,Google Analytics 4,ga4.daily_traffic,sessions / conversions by source and day,aggregate,keep,Aggregated per day: no individual can be identified
+Web analytics,Google Analytics 4,ga4.events,user_pseudo_id (cookie id),online identifier,drop,Not loaded: we only load daily aggregates
+Web analytics,Meta Pixel,meta_pixel.events,browser / device ids,online identifier,drop,Not loaded
+Social media,Instagram / Facebook / TikTok,social.account_insights,engagement / followers by day,aggregate,keep,Aggregated per day
+Social media,Instagram / Facebook / TikTok,social.comments,usernames and comment text,free text,drop,Not loaded
+Customer support,Zendesk,zendesk.users,requester email,contact,restrict,Raw layer only; used to match the golden customer
+Customer support,Zendesk,zendesk.users,requester name,identity,restrict,Never copied to the marts
+Customer support,Zendesk,zendesk.tickets,subject / description / messages,free text,restrict,May contain anything (health or size details): raw layer only
+Customer support,Zendesk,zendesk.tickets,category / status / timestamps / CSAT,business,keep,Linked to the customer key only

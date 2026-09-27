@@ -1,0 +1,8 @@
+domain,accountable_owner,responsible_steward,responsible_technical,consulted,informed
+sales,CFO,Sales director,Data engineer,E-commerce director,All report readers
+inventory,Supply chain director,Production planner,Data engineer,CFO,Sales director
+customer,Marketing director,CRM manager,Data engineer,DPO,Customer service manager
+marketing,Marketing director,CRM manager,Data engineer,E-commerce director,General management
+support,Customer service manager,Customer service team leader,Data engineer,DPO,Marketing director
+customer identity,DPO,CRM manager,Data engineer,Marketing director,General management
+raw layer,IT manager,Data engineer,Data engineer,DPO,General management
