@@ -12,7 +12,9 @@
 -- Sell-through rate: units sold / (stock at the start + units received). What was there at the start or came
 -- in was either sold or is still on hand, so this is units sold / (units sold + stock on hand).
 -- Stockout: zero stock while at least one unit sold. Stockout risk: stock left, but less than 14 days of cover.
--- Overstock: more than 180 days of cover, including stock that sold nothing in 28 days (endless cover).
+-- Overstock: more than 180 days of cover. Slow mover: stock left that sold nothing in 28 days, so its cover
+-- cannot be computed. It is kept apart from overstock: in the 1 % sample most SKUs sell less than once a
+-- month, and calling all of them overstock would hide the SKUs that really have too much stock.
 -- The thresholds are vars in dbt_project.yml.
 
 with stock as (
@@ -61,5 +63,6 @@ select
         then cast(round(demand_units / (demand_units + stock_on_hand), 4) as decimal(5, 4)) end as sell_through_rate,
     stock_on_hand = 0 and demand_units > 0                         as is_stockout,
     stock_on_hand > 0 and coalesce(cover_days < {{ var('stockout_risk_cover_days') }}, false) as is_stockout_risk,
-    stock_on_hand > 0 and (demand_units = 0 or cover_days > {{ var('overstock_cover_days') }}) as is_overstock
+    stock_on_hand > 0 and coalesce(cover_days > {{ var('overstock_cover_days') }}, false) as is_overstock,
+    stock_on_hand > 0 and demand_units = 0                         as is_slow_mover
 from cover

@@ -36,6 +36,7 @@ Stock cover,Stock on hand divided by average daily units sold over the last 28 d
 Sell-through rate,Units sold over a period divided by (stock at start of period + units received during it),Supply chain director
 Stockout,A SKU with zero stock on hand at a location while it sold at least one unit in the last 28 days,Supply chain director
 Overstock,A SKU whose stock cover is above 180 days,Supply chain director
+Slow mover,"A SKU with stock on hand at a location that sold nothing in the last 28 days, so its stock cover cannot be computed; not counted as overstock",Supply chain director
 Stockout risk,A SKU with stock on hand at a location but a stock cover below 14 days,Supply chain director
 Demand,"Units of a SKU sold over the last 28 days (all channels, returns not deducted), counted at the location that fulfils them: the warehouse for shipped web and wholesale orders, the store for till sales and click-and-collect",Supply chain director
 Units produced,Units of a SKU finished by the factories during the period (from the ERP),Supply chain director

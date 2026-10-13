@@ -151,6 +151,32 @@ class FullSample(unittest.TestCase):
             self.assertNotIn(f'"{field}"', text)
             self.assertNotIn(f";{field}", text)
 
+    def test_best_sellers_make_most_of_the_sales(self):
+        units = collections.Counter()
+        for o in self.orders:
+            for line in o["line_items"]:
+                units[line["sku"]] += line["quantity"]
+        top = sum(n for _, n in units.most_common(len(units) // 5))
+        self.assertGreater(top / sum(units.values()), 0.6)  # the top 20 % of SKUs sold online
+
+    def test_stock_follows_the_sales_of_each_location(self):
+        files = sorted((self.out / "erp" / "stock").glob("stock_*.csv"))
+        last = {(r["Item No."], r["Location Code"]): int(r["Quantity"]) for r in csv_rows(files[-1])}
+        sold_in_store = {(r["sku"], r["magasin"]) for _, r in self.tickets}
+        sold_in_store |= {(line["sku"], o["fulfillment_location"]) for o in self.orders
+                          for line in o["line_items"] if o["fulfillment_location"] != "WH-AUB"}
+        # a store only keeps the SKUs it sells
+        for (sku, location), quantity in last.items():
+            if location != "WH-AUB" and quantity:
+                self.assertIn((sku, location), sold_in_store)
+        # the factory makes what the warehouse needs: about as many units as it sends out, not many times more
+        produced = sum(int(r["Quantity"]) for r in csv_rows(self.out / "erp" / "production_orders.csv"))
+        shipped = sum(line["quantity"] for o in self.orders if not o["cancelled_at"]
+                      and o["fulfillment_location"] == "WH-AUB" for line in o["line_items"])
+        shipped += sum(int(r["Quantity"]) for r in csv_rows(self.out / "erp" / "sales_lines.csv"))
+        self.assertLess(produced, 1.5 * shipped)
+        self.assertEqual({r["Location Code"] for r in csv_rows(self.out / "erp" / "production_orders.csv")}, {"WH-AUB"})
+
     def test_stock_is_a_weekly_full_snapshot(self):
         files = sorted((self.out / "erp" / "stock").glob("stock_*.csv"))
         self.assertEqual(len(files), 157)  # every Monday from 2 January 2023 to 29 December 2025

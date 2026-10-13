@@ -58,9 +58,12 @@ models:
         description: "Stockout risk (glossary): stock left, but a stock cover below 14 days."
         data_tests: [not_null]
       - name: is_overstock
+        description: "Overstock (glossary): a stock cover above 180 days."
+        data_tests: [not_null]
+      - name: is_slow_mover
         description: >
-          Overstock (glossary): a stock cover above 180 days, including stock that sold nothing in the last
-          28 days (endless cover).
+          Slow mover (glossary): stock on hand that sold nothing in the last 28 days, so its stock cover cannot
+          be computed. Never also an overstock.
         data_tests: [not_null]
 
   - name: fct_production

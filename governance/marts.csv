@@ -39,6 +39,7 @@ inventory,fct_stock_snapshot,sell_through_rate,Sell-through rate
 inventory,fct_stock_snapshot,is_stockout,Stockout
 inventory,fct_stock_snapshot,is_stockout_risk,Stockout risk
 inventory,fct_stock_snapshot,is_overstock,Overstock
+inventory,fct_stock_snapshot,is_slow_mover,Slow mover
 inventory,fct_production,production_date,Date
 inventory,fct_production,sku,SKU
 inventory,fct_production,units_produced,Units produced

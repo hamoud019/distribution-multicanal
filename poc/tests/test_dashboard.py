@@ -150,11 +150,13 @@ class DashboardFigures(unittest.TestCase):
             self.assertAlmostEqual(row["average_basket" + suffix], float(net) / orders, places=6)
 
     def test_a_store_sees_the_click_and_collect_orders_it_hands_over(self):
-        web = sales.summary(self.con, sales.Filters(self.year, channels=("Web",), locations=("ST-PAR",))).iloc[0]
-        net, orders = self.mart("""
-            select sum(net_revenue), count(distinct case when not is_return then order_id end)
-            from marts.fct_sales where is_click_and_collect and location = 'ST-PAR' and year(order_date) = ?""",
-            self.year)
+        # the store that handed over the most click-and-collect orders this year (the small sample may have none
+        # in one of them)
+        store, net, orders = self.mart("""
+            select location, sum(net_revenue), count(distinct case when not is_return then order_id end) as orders
+            from marts.fct_sales where is_click_and_collect and year(order_date) = ?
+            group by location order by orders desc, location limit 1""", self.year)
+        web = sales.summary(self.con, sales.Filters(self.year, channels=("Web",), locations=(store,))).iloc[0]
         self.assertGreater(orders, 0)
         self.assertAlmostEqual(web.net_revenue, float(net), places=2)
         self.assertEqual(web.orders, orders)

@@ -86,8 +86,8 @@ class InventoryMart(unittest.TestCase):
         snapshots = sorted(snapshot_date(p) for p in cls.landing.glob("erp/stock/stock_*.csv"))
         skus = [row["No."] for row in read_csv(cls.landing / "erp" / "items.csv")]
 
-        # The generated stock is not tied to the sales, so the cases of the acceptance criteria are set up
-        # in the ERP stock files, on SKUs that really sold, before the single build.
+        # The cases of the acceptance criteria are set up in the ERP stock files, on SKUs that really sold,
+        # before the single build, so each test knows its exact case.
         warehouse_demand = [(s, sku, demand_before(cls.sales, s, "WH-AUB", sku)) for s in snapshots for sku in skus]
         warehouse_demand = [case for case in warehouse_demand if case[2] > 0]
         # 1. Stockout: the warehouse has none left of a SKU that sold
@@ -112,7 +112,7 @@ class InventoryMart(unittest.TestCase):
         cls.build = run_dbt(cls.warehouse, tmp / "target", "build")
         cls.mart = {(s, loc, sku): row for s, loc, sku, *row in cls.query("""
             select snapshot_date, location, sku, stock_on_hand, demand_units, stock_cover_days, sell_through_rate,
-                   is_stockout, is_stockout_risk, is_overstock
+                   is_stockout, is_stockout_risk, is_overstock, is_slow_mover
             from marts.fct_stock_snapshot""")}
 
     @classmethod
@@ -125,7 +125,7 @@ class InventoryMart(unittest.TestCase):
             return con.execute(sql, list(params)).fetchall()
 
     def row(self, snapshot, location, sku):
-        names = ("stock", "demand", "cover", "sell_through", "stockout", "stockout_risk", "overstock")
+        names = ("stock", "demand", "cover", "sell_through", "stockout", "stockout_risk", "overstock", "slow_mover")
         return dict(zip(names, self.mart[(snapshot, location, sku)]))
 
     def test_build_is_green(self):
@@ -170,8 +170,8 @@ class InventoryMart(unittest.TestCase):
 
     def test_every_row_follows_the_glossary_definitions(self):
         flags = collections.Counter()
-        for (snapshot, location, sku), (stock, demand, cover_days, sell_through, stockout, risk, overstock) \
-                in self.mart.items():
+        for (snapshot, location, sku), (stock, demand, cover_days, sell_through, stockout, risk, overstock,
+                                        slow_mover) in self.mart.items():
             expected = demand_before(self.sales, snapshot, location, sku)
             key = (snapshot, location, sku)
             self.assertEqual(demand, expected, key)
@@ -184,9 +184,17 @@ class InventoryMart(unittest.TestCase):
                 self.assertAlmostEqual(float(sell_through), demand / (demand + stock), delta=0.0001, msg=key)
             self.assertEqual(stockout, stock == 0 and demand > 0, key)
             self.assertEqual(risk, stock > 0 and days < RISK_DAYS, key)
-            self.assertEqual(overstock, stock > 0 and days > OVERSTOCK_DAYS, key)
-            flags.update({"stockout": stockout, "risk": risk, "overstock": overstock})
-        self.assertTrue(all(flags[name] for name in ("stockout", "overstock")), flags)
+            self.assertEqual(overstock, stock > 0 and demand > 0 and days > OVERSTOCK_DAYS, key)
+            self.assertEqual(slow_mover, stock > 0 and demand == 0, key)
+            flags.update({"stockout": stockout, "risk": risk, "overstock": overstock, "slow mover": slow_mover})
+        self.assertTrue(all(flags[name] for name in ("stockout", "overstock", "slow mover")), flags)
+
+    def test_stock_that_sold_nothing_is_a_slow_mover_not_an_overstock(self):
+        idle = [row for row in self.mart.values() if row[0] > 0 and row[1] == 0]
+        self.assertTrue(idle)
+        for stock, demand, cover_days, _, stockout, risk, overstock, slow_mover in idle:
+            self.assertIsNone(cover_days)
+            self.assertEqual((slow_mover, overstock, stockout, risk), (True, False, False, False))
 
     def test_production_matches_the_erp_production_orders(self):
         orders = read_csv(self.landing / "erp" / "production_orders.csv")

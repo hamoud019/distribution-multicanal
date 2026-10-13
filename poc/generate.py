@@ -15,9 +15,11 @@ card, cashier name...) are not generated, as if the ELT tool's column blocking w
 """
 
 import argparse
+import bisect
 import collections
 import csv
 import json
+import math
 import random
 import shutil
 from dataclasses import dataclass
@@ -80,6 +82,13 @@ CLICK_SHARE = 0.10              # openers who also click
 INSTAGRAM_FOLLOWERS = 150_000   # at the start of 2023
 WHOLESALE_PRICE_SHARE = 0.5     # wholesale price as a share of the retail price excl. VAT
 WEB_CONVERSION = 0.02           # orders per session (Part 0, section 4)
+SIZE_WEIGHTS = (10, 30, 30, 20, 10)  # sales by size: mostly M and L
+POPULARITY_SPREAD = 1.5         # popularity of each product is log-normal: a few best sellers, a long tail
+LEAD_WEEKS = {"WH-AUB": 3, "ST-PAR": 1, "ST-TLS": 1}  # weeks to make a batch in the factory / to restock a store
+SAFETY_UNITS = {"WH-AUB": 1, "ST-PAR": 0, "ST-TLS": 0}  # units kept on top, for the SKUs a location sells
+TARGET_COVER_WEEKS = (6, 16)    # a reorder brings the stock back to this many weeks of sales
+OVERSTOCKED_SHARE = 0.08        # SKUs whose target is set far too high (a buying mistake)...
+OVERSTOCKED_WEEKS = (35, 60)    # ...at this many weeks of sales
 GL_ACCOUNTS = (  # French chart of accounts, 701: sales of finished products (the company makes its products)
     ("701100", "Web"), ("701200", "Store"), ("701300", "Wholesale"),
 )
@@ -148,6 +157,8 @@ class Generator:
         self.products = []
         self.shopify_ids = {}     # person index -> Shopify customer id
         self.web_buyers = []      # people who have bought online at least once
+        self.popularity = []      # cumulative sales weight of each SKU, for weighted picks
+        self.sold = collections.Counter()  # units sold per (location that hands them over, SKU, day)
         self.newcomers = []       # people who have not bought online yet, in random order
         # net revenue excl. VAT by (year, month) and channel, written to the general ledger
         self.net = {channel: collections.Counter() for _, channel in GL_ACCOUNTS}
@@ -185,16 +196,24 @@ class Generator:
             ))
 
     def make_products(self):
+        total = 0.0
         for pid in range(1, self.scaled(PRODUCTS) + 1):
             category = self.rng.choice(list(CATEGORIES))
             low, high = CATEGORIES[category]
             price = float(self.rng.randint(low, high))
             colour = self.rng.choice(COLOURS)
-            for size in SIZES:
+            popularity = self.rng.lognormvariate(0, POPULARITY_SPREAD)
+            for size, size_weight in zip(SIZES, SIZE_WEIGHTS):
                 self.products.append(Product(
                     f"LSF-{pid:03d}-{size}", pid, f"{category[:-1]} {colour} {pid:03d}", category, size, colour, price,
                     money(price / (1 + VAT) * self.rng.uniform(*UNIT_COST_SHARE)),
                 ))
+                total += popularity * size_weight
+                self.popularity.append(total)
+
+    def pick_product(self):
+        """A SKU, the best sellers more often than the others."""
+        return self.products[bisect.bisect(self.popularity, self.rng.random() * self.popularity[-1])]
 
     def pick_web_buyer(self):
         """A web buyer: either a past buyer coming back or a newcomer (about 4 in 10 buyers buy again)."""
@@ -210,7 +229,7 @@ class Generator:
         return self.rng.randrange(len(self.people))
 
     def pick_lines(self, max_lines):
-        return [(self.rng.choice(self.products), self.rng.choices((1, 2, 3), weights=(80, 17, 3))[0])
+        return [(self.pick_product(), self.rng.choices((1, 2, 3), weights=(80, 17, 3))[0])
                 for _ in range(self.rng.choices(range(1, max_lines + 1), weights=(58, 28, 10, 4)[:max_lines])[0])]
 
     # --- e-commerce: Shopify ---------------------------------------------------------------------
@@ -251,6 +270,8 @@ class Generator:
                 if not cancelled:
                     local = paris_local(created)
                     self.net["Web"][(local.year, local.month)] += subtotal / (1 + VAT)
+                    for line in lines:
+                        self.sold[(order["fulfillment_location"], line["sku"], local.date())] += line["quantity"]
                     refunded_at = created + timedelta(days=self.rng.randint(5, 40))
                     # a return, refunded a few weeks later (unless that is after the end of the data)
                     if self.rng.random() < RETURN_SHARE and refunded_at.year <= YEARS[-1]:
@@ -302,6 +323,8 @@ class Generator:
                     discount = money(product.price_incl_vat * qty * 0.1) if self.rng.random() < 0.1 else 0.0
                     line_total = money(product.price_incl_vat * qty - discount)
                     total += line_total
+                    if qty > 0:
+                        self.sold[(store, product.sku, day)] += qty
                     rows.append([ticket_no, moment.strftime("%d/%m/%Y %H:%M"), store, product.sku, qty,
                                  fr_number(product.price_incl_vat), fr_number(discount), fr_number(line_total), email])
             self.net["Store"][(day.year, day.month)] += total / (1 + VAT)
@@ -328,8 +351,13 @@ class Generator:
                 posting = date(year, 1, 2) + timedelta(weeks=week % 52, days=self.rng.randint(0, 4))
                 account = self.rng.choice(WHOLESALE_ACCOUNTS)[0]
                 doc += 1
-                for n, product in enumerate(self.rng.sample(self.products, self.rng.randint(3, 8)), 1):
+                products = {}
+                for _ in range(self.rng.randint(3, 8)):  # a few SKUs, mostly best sellers, each once
+                    product = self.pick_product()
+                    products[product.sku] = product
+                for n, product in enumerate(products.values(), 1):
                     qty = self.rng.choice((6, 6, 12))
+                    self.sold[("WH-AUB", product.sku, posting)] += qty
                     price = money(product.price_incl_vat / (1 + VAT) * WHOLESALE_PRICE_SHARE)
                     lines.append([f"SO{doc:05d}", n * 10000, account, posting.isoformat(), product.sku, qty,
                                   f"{price:.2f}", f"{money(price * qty):.2f}"])
@@ -337,31 +365,58 @@ class Generator:
         write_csv(erp / "sales_lines.csv", ["Document No.", "Line No.", "Sell-to Customer No.", "Posting Date",
                                             "No.", "Quantity", "Unit Price", "Line Amount"], lines)
 
-        # Production in the Aubervilliers factory: one batch per product and quarter
-        production, n = [], 0
-        for year in YEARS:
-            for quarter in range(4):
-                for product in self.products:
-                    if self.rng.random() < 0.5:
-                        n += 1
-                        finished = date(year, quarter * 3 + 1, 1) + timedelta(days=self.rng.randint(0, 80))
-                        production.append([f"PO{n:06d}", product.sku, self.rng.choice((24, 48, 96)),
-                                           finished.isoformat(), "WH-AUB"])
-        write_csv(erp / "production_orders.csv", ["No.", "Item No.", "Quantity", "Finished Date", "Location Code"],
-                  production)
-
-        # Stock: a full snapshot every Monday (Part 0: one snapshot a week per SKU and location)
-        level = {(p.sku, code): self.rng.randint(0, 60 if code == "WH-AUB" else 8)
-                 for p in self.products for code, _, _ in LOCATIONS}
+        # Stock and production. Every location follows a reorder rule based on its own sales: when the stock
+        # (plus what is already on its way) falls to the sales of the lead time, it is brought back up to a
+        # target cover. The factory makes what the warehouse orders (the production orders); stores are
+        # restocked in a week. A store only keeps the SKUs it sells. A full snapshot is taken every Monday
+        # (Part 0: one snapshot a week per SKU and location), before the week's sales.
+        mondays = []
         day = date(YEARS[0], 1, 2)
         while day.year <= YEARS[-1]:
-            rows = []
-            for (sku, code), qty in level.items():
-                rows.append([sku, code, qty])
-                change = self.rng.randint(-6, 6) if code == "WH-AUB" else self.rng.randint(-2, 2)
-                level[(sku, code)] = max(0, qty + change)
-            write_csv(erp / "stock" / f"stock_{day:%Y%m%d}.csv", ["Item No.", "Location Code", "Quantity"], rows)
+            mondays.append(day)
             day += timedelta(weeks=1)
+        weekly = collections.Counter()
+        for (code, sku, day), qty in self.sold.items():
+            weekly[(code, sku, min(max((day - mondays[0]).days // 7, 0), len(mondays) - 1))] += qty
+        totals = collections.Counter()
+        for (code, sku, _), qty in weekly.items():
+            totals[(code, sku)] += qty
+
+        # The planners' forecast: the SKU's average weekly sales at the location, times the season of the
+        # month when a reorder would arrive (Black Friday and Christmas need more stock).
+        season = [MONTH_WEIGHTS[monday.month - 1] * 12 / sum(MONTH_WEIGHTS) for monday in mondays]
+
+        snapshots, production = [[] for _ in mondays], []
+        for p in self.products:
+            for code, _, _ in LOCATIONS:
+                rate = totals[(code, p.sku)] / len(mondays)
+                weeks = self.rng.uniform(*(OVERSTOCKED_WEEKS if self.rng.random() < OVERSTOCKED_SHARE
+                                           else TARGET_COVER_WEEKS))
+                lead, safety = LEAD_WEEKS[code], SAFETY_UNITS[code] if rate else 0
+
+                def forecast(w):
+                    return rate * season[min(w + lead, len(mondays) - 1)]
+
+                def target(w):
+                    return max(math.ceil(forecast(w) * weeks), safety + 1) if rate else 0
+
+                stock, arriving = target(0), collections.Counter()
+                for w in range(len(mondays)):
+                    stock += arriving.pop(w, 0)
+                    snapshots[w].append([p.sku, code, stock])
+                    stock = max(0, stock - weekly[(code, p.sku, w)])
+                    on_the_way = sum(arriving.values())
+                    if rate and stock + on_the_way <= forecast(w) * lead + safety:
+                        quantity = max(target(w) - stock - on_the_way, 1)
+                        arriving[w + lead] += quantity
+                        if code == "WH-AUB" and w + lead < len(mondays):
+                            finished = mondays[w + lead] - timedelta(days=self.rng.randint(1, 4))
+                            production.append([p.sku, quantity, finished.isoformat(), code])
+        for monday, rows in zip(mondays, snapshots):
+            write_csv(erp / "stock" / f"stock_{monday:%Y%m%d}.csv", ["Item No.", "Location Code", "Quantity"], rows)
+        production.sort(key=lambda r: (r[2], r[0]))
+        write_csv(erp / "production_orders.csv", ["No.", "Item No.", "Quantity", "Finished Date", "Location Code"],
+                  [[f"PO{n:06d}", *row] for n, row in enumerate(production, 1)])
 
         # General ledger: monthly revenue per channel, as accounting credits (negative amounts)
         gl, entry = [], 0

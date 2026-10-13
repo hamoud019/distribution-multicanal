@@ -53,12 +53,15 @@ Part 0 gives the volumes, the basket, the share of repeat buyers and the channel
 | Assumption | Value |
 |---|---|
 | Sales by month | peaks in November (Black Friday) and December (Christmas) |
+| Best sellers | each product's popularity is log-normal: the top 20 % of SKUs make about three quarters of the units sold |
+| Sales by size | S 10 %, M 30 %, L 30 %, XL 20 %, XXL 10 % |
 | Free shipping | from 69 € incl. VAT; 4.90 € below |
 | Web orders with a promotion | 2 in 5, at 10 % or 20 % |
 | Web orders cancelled / collected in a store / with a return | 2 % / 5 % / 8 % |
 | Store tickets in Paris and Toulouse | 60 % / 40 % |
 | Store tickets sent by email / store lines that are a return | 60 % / 3 % |
 | Production cost | 30 % to 45 % of the price excl. VAT |
+| Stock and production | each location reorders from its own sales: when its stock (plus what is on the way) falls to the forecast sales of the lead time, it is brought back to 6 to 16 weeks of sales; 8 % of SKUs get 35 to 60 weeks by mistake. The forecast follows the season of the month. The factory takes 3 weeks and makes what the warehouse orders (the production orders); a store is restocked in 1 week and only keeps the SKUs it sells; the warehouse keeps 1 unit of safety stock |
 | Wholesale price | 50 % of the retail price excl. VAT |
 | People subscribed to emails / opening a campaign | 35 % / 30 % (the Part 3 assumptions) |
 | People with a Klaviyo profile / with another email in Klaviyo | 70 % / 10 % |
@@ -104,7 +107,7 @@ The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr
 - **Margin** is net revenue minus quantity × the unit cost of the ERP.
 - **Customer key** is a **placeholder** until the golden customer (issue #11): a hash of the Shopify account id. Store tickets stay anonymous and wholesale accounts are companies, so they have none.
 
-**Reconciliation with finance (story 5).** `dbt/tests/assert_sales_reconcile_with_erp_finance.sql` compares the mart with the general ledger for every month and channel. The gap must stay within **0.5 %** of the ERP figure: the tolerance of [Part 4](../docs/deliverables/04-transformation-plan.md) (§4), set as `reconciliation_tolerance` in `dbt/dbt_project.yml`. On the generated data the largest gap is about 20 cents in a month (cent rounding per line). The end-to-end test shows that a month booked 0.6 % higher in the ledger makes `dbt build` fail.
+**Reconciliation with finance (story 5).** `dbt/tests/assert_sales_reconcile_with_erp_finance.sql` compares the mart with the general ledger for every month and channel. The gap must stay within **0.5 %** of the ERP figure: the tolerance of [Part 4](../docs/deliverables/04-transformation-plan.md) (§4), set as `reconciliation_tolerance` in `dbt/dbt_project.yml`. On the generated data the largest gap is a few cents in a month (cent rounding per line). The end-to-end test shows that a month booked 0.6 % higher in the ledger makes `dbt build` fail.
 
 ### The Inventory Optimization mart
 
@@ -112,7 +115,7 @@ The third use case (issue #12), in `dbt/models/marts/inventory`. It reuses `dim_
 
 | Table | Grain | What |
 |---|---|---|
-| `fct_stock_snapshot` | snapshot date × location × SKU | stock on hand from the ERP snapshot, demand of the last 28 days, stock cover, sell-through rate, and the stockout, stockout risk and overstock flags |
+| `fct_stock_snapshot` | snapshot date × location × SKU | stock on hand from the ERP snapshot, demand of the last 28 days, stock cover, sell-through rate, and the stockout, stockout risk, overstock and slow mover flags |
 | `fct_production` | one production order | the units of a SKU the factory finished on a day |
 
 The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr.md):
@@ -121,11 +124,12 @@ The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr
 - **Demand is counted where the stock leaves**, the location of `fct_sales`: the warehouse for shipped web orders and wholesale, the store for till sales and click-and-collect. So the warehouse's cover counts the online demand (most of the demand), and a store's cover counts its till sales **plus** the web orders collected there, never its till sales only (story 17). Comparing stock in one place with sales of the whole network would hide which location runs out.
 - **Stock cover** = stock on hand ÷ (demand ÷ 28), in days. It is empty when nothing sold in 28 days: the cover is endless.
 - **Sell-through rate** = units sold ÷ (stock at the start + units received) over the 28 days. Everything that was there or came in was either sold or is still on hand, so this is units sold ÷ (units sold + stock on hand). It needs no stock movements, which the ERP export does not give.
-- **Stockout**: zero stock while at least one unit sold. **Stockout risk**: stock left, but less than **14 days** of cover. **Overstock**: more than **180 days** of cover, including stock that sold nothing in 28 days.
+- **Stockout**: zero stock while at least one unit sold. **Stockout risk**: stock left, but less than **14 days** of cover. **Overstock**: more than **180 days** of cover.
+- **Slow mover**: stock left that sold nothing in 28 days, so its cover cannot be computed. It is a flag of its own, not an overstock: in a 1 % sample most SKUs sell less than once a month, and counting them all as overstock would hide the SKUs that really have too much stock.
 
 The 28, 180 and 14 days are `demand_window_days`, `overstock_cover_days` and `stockout_risk_cover_days` in `dbt/dbt_project.yml`. 28 and 180 come from the glossary; 14 days is our assumption (two weeks for the factory or the warehouse to send more), to be agreed with the supply chain director. The supply planner's list (story 18) is the latest snapshot filtered on the flags.
 
-On the generated data, about 9 rows in 10 are overstock: the generator draws stock levels without looking at the sales, and they are high for a 1 % sample of the sales. The rules are what matters here; the end-to-end tests set up each case in the stock files.
+On the generated data, the stock follows the sales (see the assumptions of the generator). At the last snapshot, the warehouse holds 1,122 SKUs: 26 are out of stock, 20 at risk, 22 overstocked, and 775 are slow movers, because a 1 % sample of the sales leaves most SKUs with less than one sale a month. The end-to-end tests also set up each case in the stock files, so each test knows its exact case.
 
 Every source declares its refresh schedule and freshness thresholds in `dbt/models/staging/_sources.yml`, set from Part 4 §5: sources refreshed every 15 minutes warn after 1 hour, hourly sources after 3 hours, daily sources after 26 hours.
 
@@ -164,11 +168,11 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 
 (Any Python runs the generator tests; the others are skipped without dbt and DuckDB.)
 
-- `test_generate.py`: same seed gives the same files, volumes match Part 0, the data looks like the company, and each source has its quirks.
+- `test_generate.py`: same seed gives the same files, volumes match Part 0, the data looks like the company (best sellers make most of the sales; stock follows the sales of each location and the factory makes about what the warehouse ships), and each source has its quirks.
 - `test_ingest.py`: every record is loaded unchanged with its metadata, a second run loads only new files, a changed file replaces its old rows, and paths with an apostrophe work.
 - `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 19 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
   For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
-- `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; on every row, stock, demand, cover, sell-through and the three flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.
+- `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; stock that sold nothing is a slow mover, not an overstock; on every row, stock, demand, cover, sell-through and the four flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.
 - `test_dashboard.py`: the dashboard refuses raw, staging and intermediate tables and files, every query it sends reads only `marts` tables, the page runs no SQL of its own, and the warehouse is read-only. On a small generated warehouse, its figures match the mart: the totals and last year match `fct_sales_monthly`; a store, a category and some months match `fct_sales` this year and last year (net revenue, orders, average basket); a store sees the click-and-collect orders it hands over; channels and locations add up to the total; and the page opens without error, also with a store filter.
 
 The same seed gives the same data with the same Python version; Python only promises the same random numbers within a version.
