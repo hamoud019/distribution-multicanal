@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: fct_stock_snapshot
+    description: >
+      The stock fact (Inventory Optimization use case): stock on hand per snapshot date, location and SKU, with
+      the demand of every channel over the last 28 days, the stock cover, the sell-through rate and the stockout,
+      stockout risk and overstock flags (glossary, Part 6). Demand is counted at the location that fulfils the
+      sale: the warehouse for shipped web orders and wholesale, the store for till sales and click-and-collect.
+      Thresholds are vars in dbt_project.yml (demand_window_days, overstock_cover_days, stockout_risk_cover_days).
+    data_tests:
+      - unique:
+          column_name: "snapshot_date || '|' || location || '|' || sku"
+    columns:
+      - name: snapshot_date
+        description: "Snapshot date (glossary): the day the stock was counted (one snapshot a week in the proof of concept)."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: location
+        description: "Location (glossary): the warehouse/factory or a store."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location
+      - name: sku
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: sku
+      - name: stock_on_hand
+        description: "Stock on hand (glossary): units at the location on the snapshot date."
+        data_tests: [not_null]
+      - name: demand_units
+        description: >
+          Demand (glossary): units sold in the 28 days before the snapshot date, all channels, at the location
+          that fulfils them. Returns are not deducted.
+        data_tests: [not_null]
+      - name: stock_cover_days
+        description: >
+          Stock cover (glossary): stock on hand / average daily demand, in days. Empty when nothing sold in
+          28 days (the cover is endless).
+      - name: sell_through_rate
+        description: >
+          Sell-through rate (glossary): units sold / (stock at the start + units received) over the 28 days,
+          that is units sold / (units sold + stock on hand). Empty when there was neither stock nor sales.
+      - name: is_stockout
+        description: "Stockout (glossary): zero stock on hand while at least one unit sold in the last 28 days."
+        data_tests: [not_null]
+      - name: is_stockout_risk
+        description: "Stockout risk (glossary): stock left, but a stock cover below 14 days."
+        data_tests: [not_null]
+      - name: is_overstock
+        description: >
+          Overstock (glossary): a stock cover above 180 days, including stock that sold nothing in the last
+          28 days (endless cover).
+        data_tests: [not_null]
+
+  - name: fct_production
+    description: Production of the Aubervilliers factory, one row per finished production order (from the ERP).
+    columns:
+      - name: production_order
+        description: The Business Central production order number.
+        data_tests: [unique, not_null]
+      - name: production_date
+        description: "Date (glossary): the day the batch was finished."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: location
+        description: "Location (glossary): where the batch was made and stored."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location
+      - name: sku
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: sku
+      - name: units_produced
+        description: "Units produced (glossary): units of the SKU finished in the batch."
+        data_tests: [not_null]

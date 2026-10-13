@@ -16,6 +16,12 @@ vars:
   # Largest accepted gap between the sales mart and the ERP general ledger, per month and channel,
   # as a share of the ERP figure (Part 4, section 4: our choice, to be agreed with the CFO)
   reconciliation_tolerance: 0.005
+  # Inventory thresholds (glossary, Part 6): demand is the units sold over the last 28 days, a SKU is
+  # overstocked above 180 days of cover, and at risk of a stockout below 14 days (our assumption: two
+  # weeks for the factory or the warehouse to send more, to be agreed with the supply chain director)
+  demand_window_days: 28
+  overstock_cover_days: 180
+  stockout_risk_cover_days: 14
 
 models:
   lsf_poc:

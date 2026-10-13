@@ -106,6 +106,27 @@ The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr
 
 **Reconciliation with finance (story 5).** `dbt/tests/assert_sales_reconcile_with_erp_finance.sql` compares the mart with the general ledger for every month and channel. The gap must stay within **0.5 %** of the ERP figure: the tolerance of [Part 4](../docs/deliverables/04-transformation-plan.md) (§4), set as `reconciliation_tolerance` in `dbt/dbt_project.yml`. On the generated data the largest gap is about 20 cents in a month (cent rounding per line). The end-to-end test shows that a month booked 0.6 % higher in the ledger makes `dbt build` fail.
 
+### The Inventory Optimization mart
+
+The third use case (issue #12), in `dbt/models/marts/inventory`. It reuses `dim_date`, `dim_product` and `dim_location` of the sales mart, and takes its demand from `fct_sales`, so stock and sales use the same figures.
+
+| Table | Grain | What |
+|---|---|---|
+| `fct_stock_snapshot` | snapshot date × location × SKU | stock on hand from the ERP snapshot, demand of the last 28 days, stock cover, sell-through rate, and the stockout, stockout risk and overstock flags |
+| `fct_production` | one production order | the units of a SKU the factory finished on a day |
+
+The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr.md):
+
+- **Demand** is the units sold in the **28 days before the snapshot date**, in **all channels**: Web, Store and Wholesale (wholesale orders leave the same warehouse, so they use the same stock). Returns are not taken off: a buyer needs what customers took, and returned items come back into the stock count. Cancelled orders are not sales.
+- **Demand is counted where the stock leaves**, the location of `fct_sales`: the warehouse for shipped web orders and wholesale, the store for till sales and click-and-collect. So the warehouse's cover counts the online demand (most of the demand), and a store's cover counts its till sales **plus** the web orders collected there, never its till sales only (story 17). Comparing stock in one place with sales of the whole network would hide which location runs out.
+- **Stock cover** = stock on hand ÷ (demand ÷ 28), in days. It is empty when nothing sold in 28 days: the cover is endless.
+- **Sell-through rate** = units sold ÷ (stock at the start + units received) over the 28 days. Everything that was there or came in was either sold or is still on hand, so this is units sold ÷ (units sold + stock on hand). It needs no stock movements, which the ERP export does not give.
+- **Stockout**: zero stock while at least one unit sold. **Stockout risk**: stock left, but less than **14 days** of cover. **Overstock**: more than **180 days** of cover, including stock that sold nothing in 28 days.
+
+The 28, 180 and 14 days are `demand_window_days`, `overstock_cover_days` and `stockout_risk_cover_days` in `dbt/dbt_project.yml`. 28 and 180 come from the glossary; 14 days is our assumption (two weeks for the factory or the warehouse to send more), to be agreed with the supply chain director. The supply planner's list (story 18) is the latest snapshot filtered on the flags.
+
+On the generated data, about 9 rows in 10 are overstock: the generator draws stock levels without looking at the sales, and they are high for a 1 % sample of the sales. The rules are what matters here; the end-to-end tests set up each case in the stock files.
+
 Every source declares its refresh schedule and freshness thresholds in `dbt/models/staging/_sources.yml`, set from Part 4 §5: sources refreshed every 15 minutes warn after 1 hour, hourly sources after 3 hours, daily sources after 26 hours.
 
 ## Tests
@@ -123,6 +144,7 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 - `test_ingest.py`: every record is loaded unchanged with its metadata, a second run loads only new files, a changed file replaces its old rows, and paths with an apostrophe work.
 - `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 19 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
   For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
+- `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; on every row, stock, demand, cover, sell-through and the three flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.
 
 The same seed gives the same data with the same Python version; Python only promises the same random numbers within a version.
 

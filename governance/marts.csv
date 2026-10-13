@@ -33,9 +33,11 @@ inventory,fct_stock_snapshot,snapshot_date,Snapshot date
 inventory,fct_stock_snapshot,location,Location
 inventory,fct_stock_snapshot,sku,SKU
 inventory,fct_stock_snapshot,stock_on_hand,Stock on hand
+inventory,fct_stock_snapshot,demand_units,Demand
 inventory,fct_stock_snapshot,stock_cover_days,Stock cover
 inventory,fct_stock_snapshot,sell_through_rate,Sell-through rate
 inventory,fct_stock_snapshot,is_stockout,Stockout
+inventory,fct_stock_snapshot,is_stockout_risk,Stockout risk
 inventory,fct_stock_snapshot,is_overstock,Overstock
 inventory,fct_production,production_date,Date
 inventory,fct_production,sku,SKU

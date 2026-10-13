@@ -43,3 +43,40 @@ models:
                 values: ["Web", "Store", "Wholesale"]
       - name: revenue
         description: Net revenue booked on the account, excluding VAT, positive for a sale.
+
+  - name: stg_erp__stock
+    description: >
+      Stock snapshots from Business Central: one row per snapshot date, location and SKU. The date comes from
+      the file name. One snapshot a week in the proof of concept, one a day in production.
+    data_tests:
+      - unique:
+          column_name: "snapshot_date || '|' || location_code || '|' || sku"
+    columns:
+      - name: snapshot_date
+        data_tests: [not_null]
+      - name: location_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__locations')
+                field: location_code
+      - name: sku
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__items')
+                field: sku
+      - name: stock_on_hand
+        data_tests: [not_null]
+
+  - name: stg_erp__production_orders
+    description: Finished production orders from Business Central, one batch of one SKU each.
+    columns:
+      - name: production_order
+        data_tests: [unique, not_null]
+      - name: sku
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__items')
+                field: sku
