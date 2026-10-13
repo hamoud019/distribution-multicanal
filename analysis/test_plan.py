@@ -4,7 +4,7 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from costing import load_lines
+from costing import load_lines, load_parameters
 from plan import (
     BRIEF_SOURCES, Milestone, Phase, check, consultant_days_by_year, gantt, live_sources_by_year,
     load_milestones, load_phases, load_sources, milestone_table, phase_details, phase_table, retention_months,
@@ -177,6 +177,17 @@ class PublishedPlan(unittest.TestCase):
         for figure in ("90 %", "200 pairs"):
             self.assertIn(figure, rules)
             self.assertIn(figure, DOC)
+
+    def test_doc_quotes_the_yearly_fivetran_cost_of_klaviyo(self):
+        with open(HERE / "fivetran_rows.csv", newline="", encoding="utf-8") as f:
+            (crm,) = [int(r["rows_per_month"]) for r in csv.DictReader(f) if r["source"].startswith("CRM")]
+        (rows,) = [l for l in load_lines(HERE / "cost_lines.csv")
+                   if l.option == "lakehouse_cloud" and l.item.startswith("Fivetran rows")]
+        usd_per_eur = load_parameters(HERE / "cost_parameters.csv")["usd_per_eur"]
+        yearly = 12 * crm / 1e6 * rows.unit_price / usd_per_eur
+        part3 = (HERE.parent / "docs" / "deliverables" / "03-costing.md").read_text(encoding="utf-8")
+        self.assertIn(f"about {round(yearly, -3):,.0f} € in year 3", DOC)
+        self.assertIn(f"would save about {round(yearly, -3):,.0f} €", part3)
 
     def test_doc_mentions_every_mitigation(self):
         for m in TOP_PART4_MITIGATIONS:

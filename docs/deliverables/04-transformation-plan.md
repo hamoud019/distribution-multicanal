@@ -105,6 +105,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 ### Phase 3: Customer segmentation (September 2028 to June 2029)
 
 - **The DPIA comes first** (M-TRF-5). Part 6 showed that segmentation meets two CNIL criteria (evaluation of customers, large scale), so the impact assessment must be approved **before** any customer data is loaded for segmentation. The DPO works on it from September to December 2028.
+- **Before loading Klaviyo, choose how** (November 2028, M-TRF-6). Klaviyo's email events make it the biggest Fivetran cost: about 17,000 € in year 3, out of about 18,900 € of Fivetran rows over the 3 years (Part 3, §3). The data engineer checks which event types are really needed (Part 6 only uses opens and clicks) and compares Fivetran with Airbyte, which is free if we host it but must then be maintained.
 - In January 2029, **Klaviyo, Zendesk, web analytics and social media** are connected, with the marketing consent flag carried from the source.
 - **The match-rate gate** (M-TRF-2): the phase starts with the DPIA and the loading of the customer sources, but the golden customer and the segments are only built when at least 90 % of the Klaviyo profiles with an order are matched to a Shopify customer, and fewer than 200 pairs wait for manual review (Part 6, §2).
 - The Customer and Marketing reports go live at the end of April. Segments exclude people without marketing consent. In May, the erasure procedure of Part 6 is tested end to end on a test customer, from the source tools to Power BI.
@@ -141,6 +142,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 | 31 May 2028 | 2 | First monthly comparison of stock-outs and overstock with the baseline | M-TRF-12 |
 | 30 Jun 2028 | 2 | Go/no-go for phase 3; inventory result reviewed against the baseline | M-TRF-12 |
 | 4 Sep 2028 | 3 | DPIA for customer segmentation started by the DPO | M-TRF-5 |
+| 17 Nov 2028 | 3 | Klaviyo loading chosen: which event types Fivetran syncs, compared with Airbyte (free if self-hosted), because Klaviyo is the biggest Fivetran cost | M-TRF-6 |
 | 15 Dec 2028 | 3 | DPIA approved: customer data can be loaded for segmentation | M-TRF-5 |
 | 15 Jan 2029 | 3 | Klaviyo and Zendesk loaded every hour, web analytics and social media every day; consent flag carried from the source | M-TRF-5 |
 | 26 Feb 2029 | 3 | Match-rate gate: at least 90 % of Klaviyo profiles with an order matched, and fewer than 200 pairs waiting for review | M-TRF-2 |
@@ -244,8 +246,8 @@ Part 2 asked the transformation plan to give a concrete action, with a phase and
 |---|---|---|
 | R02: customers can't be matched (16) | **M-TRF-2** | Matching rules and stewards in phase 1 (25 Jun 2027); match rate measured monthly; match-rate gate before segments (26 Feb 2029) |
 | R03: dependence on one engineer (16) | **M-TRF-3** | Engineer in post before the build (15 Mar 2027), paired with the consultant; back-up trained (30 Nov 2027); the consultant leaves at gate 3 (29 Jun 2029) and the internal team runs phase 4 alone |
-| R05: GDPR (15) | **M-TRF-5** | Raw layer restricted, retention and erasure approved in phase 0; DPIA approved (15 Dec 2028) before customer data is loaded (15 Jan 2029); consent flag carried; erasure tested (31 May 2029); EU region from phase 0 |
 | R12: inventory benefit doesn't arrive (16) | **M-TRF-12** | Baseline measured July to December 2027, before phase 2; monthly follow-up from May 2028; reviewed at gates 1, 2, 3 and 4 |
+| R05: GDPR (15) | **M-TRF-5** | Raw layer restricted, retention and erasure approved in phase 0; DPIA approved (15 Dec 2028) before customer data is loaded (15 Jan 2029); consent flag carried; erasure tested (31 May 2029); EU region from phase 0 |
 
 The other Part 4 mitigations of the register are also dated in the milestone table: M-TRF-4 (budget and scope), M-TRF-6 (contracts), M-TRF-7 (no preview features), M-TRF-8 (POS loading and daily reconciliation), M-TRF-9 (glossary and refresh times) and M-TRF-11 (confirm the ERP). R01, the top risk (teams keep their reports), is handled by M-CHG-1 in Part 5; this plan gives it its dates (§6). A test checks that every Part 4 mitigation of the register has a dated milestone.
 
