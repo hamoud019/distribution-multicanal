@@ -13,6 +13,7 @@ Spec and work breakdown: issue #1.
 | 2 | [SWOT and risk assessment](docs/deliverables/02-swot-risks.md) | #4 |
 | 3 | [Full costing](docs/deliverables/03-costing.md) | #3 |
 | 4 | [Transformation plan](docs/deliverables/04-transformation-plan.md) | #6 |
+| 5 | [Change management plan](docs/deliverables/05-change-management.md) | #7 |
 | 6 | [Data governance and GDPR](docs/deliverables/06-governance-gdpr.md) | #5 |
 
 ## Governance rules
@@ -21,12 +22,13 @@ The glossary, planned report tables, personal-data inventory, retention periods,
 
 ## Decision matrices
 
-The scores, cost lines, risk register and transformation plan behind the deliverables are CSV files in [`analysis/`](analysis). To recompute them after changing a figure:
+The scores, cost lines, risk register, transformation plan and change management plan behind the deliverables are CSV files in [`analysis/`](analysis). To recompute them after changing a figure:
 
 ```
 python analysis/scoring.py
 python analysis/costing.py
 python analysis/risks.py
 python analysis/plan.py
+python analysis/change.py
 python -m unittest discover analysis
 ```

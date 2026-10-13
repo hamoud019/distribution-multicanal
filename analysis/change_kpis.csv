@@ -1,0 +1,6 @@
+kpi,definition,target,source,frequency,owner
+Active users,"Share of the users trained so far (25 Power BI users once all are trained, in 2029) who opened at least one report in the last 30 days","80 % (20 people) at the end of each parallel run, then 90 % after the project",Power BI usage metrics (unique viewers),Every month,Data engineer
+Report usage,Views of each replacement report by its department,Every replacement report is opened at least once a week by its department,Power BI usage metrics (report views),Every month,Data champions
+Old reports retired,Old reports retired on their date out of the 13 old reports of the map,100 % on the dates of the map,Report replacement map (this part),At each gate,Chief executive (sponsor)
+Training done,People trained before their go-live out of the people planned,All 5 report creators; at least 90 % of the readers,Training register,At each go-live,HR / training manager
+Satisfaction,"Average answer, from 1 to 5, to ""The reports help me do my job"" in a three-question survey",At least 4 out of 5,Short survey,Every quarter,HR / training manager

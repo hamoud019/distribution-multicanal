@@ -1,0 +1,14 @@
+id,legacy_report,department,built_from,replaced_by,mart_table,phase,live,retire,owner
+L01,Weekly web sales (Excel from Shopify exports),E-commerce,Shopify,"Sales report, Web page",fct_sales,1,2027-07-30,2027-10-08,CFO
+L02,Daily store sales (Excel from the tills),Sales / Store,POS,"Sales report, Stores page",fct_sales,1,2027-07-30,2027-10-15,CFO
+L03,Wholesale sales by hypermarket (Excel from the ERP),Sales / Store,ERP,"Sales report, Wholesale page",fct_sales,1,2027-07-30,2027-10-22,CFO
+L04,Monthly revenue by channel for management (Excel merging the three files above),General management and finance,"Shopify, POS, ERP","Sales report, Overview page",fct_sales,1,2027-07-30,2027-10-29,CFO
+L05,"Best-sellers by product, size and colour (Excel)",Supply chain / Purchasing,"Shopify, ERP","Sales report, Products page",dim_product,1,2027-07-30,2027-10-29,CFO
+L06,Stock by location (ERP export),Supply chain / Purchasing,ERP,"Inventory report, Stock page",fct_stock_snapshot,2,2028-03-31,2028-06-09,Supply chain director
+L07,Production plan by size and colour (spreadsheet),Supply chain / Purchasing,"ERP, sales exports","Inventory report, Production page",fct_production,2,2028-03-31,2028-06-30,Supply chain director
+L08,Stock-out and overstock watch list (spreadsheet),Supply chain / Purchasing,"ERP, Shopify","Inventory report, Alerts page",fct_stock_snapshot,2,2028-03-31,2028-06-16,Supply chain director
+L09,Campaign results (Excel from Klaviyo and Shopify),Marketing,"Klaviyo, Shopify","Marketing report, Campaigns page",fct_campaign,3,2029-03-30,2029-06-15,Marketing director
+L10,Target lists built by hand from Shopify customer exports,Marketing,Shopify,"Customer report, Segments page",dim_customer,3,2029-03-30,2029-06-29,Marketing director
+L11,Support dashboard built by hand (Zendesk export),Customer service,Zendesk,Support report,fct_ticket,4,2029-07-31,2029-10-12,Customer service manager
+L12,Weekly web traffic and conversion (GA4 export),E-commerce,Google Analytics 4,"Marketing report, Web page",fct_web_daily,4,2029-07-31,2029-10-19,Marketing director
+L13,Monthly social media figures (copied by hand from each platform),Marketing,"Instagram, Facebook, TikTok","Marketing report, Social page",fct_social_daily,4,2029-07-31,2029-10-26,Marketing director

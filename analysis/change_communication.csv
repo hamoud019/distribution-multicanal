@@ -1,0 +1,19 @@
+date,phase,kind,audience,message,channel,sender
+2027-01-04,0,announce,All staff,"Why: one set of figures for all channels and less time copying Excel files. What: five phases over three years. What does not change: the tools used every day (Shopify, Klaviyo, Zendesk, the ERP)",All-staff meeting,Chief executive (sponsor)
+2027-02-26,0,announce,Department heads,"The report replacement map: which of your reports is replaced, by what, and on which date; the role of your data champion",One workshop per department,Chief executive (sponsor) and IT manager
+2027-03-19,0,announce,All staff,Who the data champions are and how to reach them,Internal newsletter,Chief executive (sponsor)
+2027-07-30,1,go_live,"Sales / Store, E-commerce, Supply chain, management",The sales report is live; the old reports keep running until October; where to ask for help,Email and a demo in each team meeting,Sales director and CFO
+2027-08-27,1,retirement_notice,Owners of reports L01 to L05,"Each old sales report retires on its date in October, after the August and September closes",Email from the sponsor and a reminder from the champion,Chief executive (sponsor)
+2027-10-29,1,result,All staff,Old sales reports retired; first figures on use of the new report,Internal newsletter,Chief executive (sponsor)
+2027-12-17,1,result,All staff,"Gate 1: what the sales step delivered, the inventory baseline, what comes next",All-staff meeting,Chief executive (sponsor)
+2028-03-31,2,go_live,"Supply chain / Purchasing, Sales / Store",The inventory report is live; the spreadsheets keep running until June,Demo in the supply chain meeting,Supply chain director
+2028-05-05,2,retirement_notice,Owners of reports L06 to L08,"The stock and production spreadsheets retire one by one in June, on the dates of the report map",Email,Chief executive (sponsor)
+2028-06-30,2,result,All staff,Gate 2: stock-outs and overstock compared with the baseline,Internal newsletter,Chief executive (sponsor) and supply chain director
+2028-09-04,3,announce,"Marketing, Customer service, E-commerce","What the customer view will allow and what it will not: consent rules, no names in reports, why the impact assessment (DPIA) comes first",Workshop,DPO and marketing director
+2029-03-30,3,go_live,"Marketing, E-commerce, Customer service",Customer and marketing reports are live; segments respect consent,Demo,Marketing director
+2029-05-11,3,retirement_notice,Owners of reports L09 and L10,"Campaign spreadsheets and hand-made target lists retire in June, on the dates of the report map; Shopify customer exports for targeting stop",Email,Chief executive (sponsor)
+2029-06-29,3,result,All staff,Gate 3: the consultant leaves and the internal team takes over,All-staff meeting,Chief executive (sponsor)
+2029-07-02,4,announce,"Customer service, E-commerce, Marketing",The last reports to move and their dates,Email,IT manager
+2029-07-31,4,go_live,"Customer service, E-commerce, Marketing","Support, web and social pages are live",Demo by the champions,Data champions
+2029-08-31,4,retirement_notice,Owners of reports L11 to L13,"The last channel reports retire in October, on the dates of the report map",Email,Chief executive (sponsor)
+2029-10-26,4,result,All staff,Every channel report retired; adoption figures; thanks to the champions,All-staff meeting,Chief executive (sponsor)

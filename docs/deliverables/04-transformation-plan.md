@@ -58,13 +58,13 @@ gantt
   Gate 1 :crit, milestone, 2027-12-17, 0d
   section 2. Inventory optimization
   Inventory optimization :p2, 2028-01-10, 2028-06-30
-  Inventory reports live :milestone, 2028-04-28, 0d
+  Inventory reports live :milestone, 2028-03-31, 0d
   Gate 2 :crit, milestone, 2028-06-30, 0d
   section 3. Customer segmentation
   Customer segmentation :p3, 2028-09-04, 2029-06-29
   DPIA approved :milestone, 2028-12-15, 0d
   Match-rate gate :milestone, 2029-02-26, 0d
-  Segments live :milestone, 2029-04-30, 0d
+  Segments live :milestone, 2029-03-30, 0d
   Gate 3 and consultant leaves :crit, milestone, 2029-06-29, 0d
   section 4. Remaining reports and handover
   Remaining reports and handover :p4, 2029-07-02, 2029-12-21
@@ -100,7 +100,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 
 - The Fabric capacity stays at F2, as costed in Part 3. The Capacity Metrics app (§7) shows if the inventory reports need the next size, F4.
 - The Inventory mart uses the stock snapshots, the production data of the factories, and the sales of all channels already loaded in phase 1. It shows stock cover, sell-through, and the lists of stock-outs and overstock defined in the glossary.
-- From May, stock-outs and overstock are compared with the baseline **every month**, and the result is reviewed at gate 2 (M-TRF-12).
+- The inventory reports go live at the end of March. From April, stock-outs and overstock are compared with the baseline **every month**, and the result is reviewed at gate 2 (M-TRF-12).
 
 ### Phase 3: Customer segmentation (September 2028 to June 2029)
 
@@ -108,7 +108,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 - **Before loading Klaviyo, choose how** (November 2028, M-TRF-6). Klaviyo's email events make it the biggest Fivetran cost: about 17,000 € in year 3, out of about 18,900 € of Fivetran rows over the 3 years (Part 3, §3). The data engineer checks which event types are really needed (Part 6 only uses opens and clicks) and compares Fivetran with Airbyte, which is free if we host it but must then be maintained.
 - In January 2029, **Klaviyo, Zendesk, web analytics and social media** are connected, with the marketing consent flag carried from the source.
 - **The match-rate gate** (M-TRF-2): the phase starts with the DPIA and the loading of the customer sources, but the golden customer and the segments are only built when at least 90 % of the Klaviyo profiles with an order are matched to a Shopify customer, and fewer than 200 pairs wait for manual review (Part 6, §2).
-- The Customer and Marketing reports go live at the end of April. Segments exclude people without marketing consent. In May, the erasure procedure of Part 6 is tested end to end on a test customer, from the source tools to Power BI.
+- The Customer and Marketing reports go live at the end of March. Segments exclude people without marketing consent. In May, the erasure procedure of Part 6 is tested end to end on a test customer, from the source tools to Power BI.
 
 ### Phase 4: Remaining reports and hand-over (July to December 2029)
 
@@ -138,15 +138,15 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 | 17 Dec 2027 | 1 | Six-month inventory baseline (July to December) presented to the steering committee | M-TRF-12 |
 | 17 Dec 2027 | 1 | Go/no-go for phase 2 |  |
 | 10 Jan 2028 | 2 | Inventory build starts on 9 months of snapshots; Fabric capacity checked with the Capacity Metrics app (it stays at F2 unless the app shows it is too small) |  |
-| 28 Apr 2028 | 2 | Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets |  |
-| 31 May 2028 | 2 | First monthly comparison of stock-outs and overstock with the baseline | M-TRF-12 |
+| 31 Mar 2028 | 2 | Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets |  |
+| 28 Apr 2028 | 2 | First monthly comparison of stock-outs and overstock with the baseline | M-TRF-12 |
 | 30 Jun 2028 | 2 | Go/no-go for phase 3; inventory result reviewed against the baseline | M-TRF-12 |
 | 4 Sep 2028 | 3 | DPIA for customer segmentation started by the DPO | M-TRF-5 |
 | 17 Nov 2028 | 3 | Klaviyo loading chosen: which event types Fivetran syncs, compared with Airbyte (free if self-hosted), because Klaviyo is the biggest Fivetran cost | M-TRF-6 |
 | 15 Dec 2028 | 3 | DPIA approved: customer data can be loaded for segmentation | M-TRF-5 |
 | 15 Jan 2029 | 3 | Klaviyo and Zendesk loaded every hour, web analytics and social media every day; consent flag carried from the source | M-TRF-5 |
 | 26 Feb 2029 | 3 | Match-rate gate: at least 90 % of Klaviyo profiles with an order matched, and fewer than 200 pairs waiting for review | M-TRF-2 |
-| 30 Apr 2029 | 3 | Customer and Marketing reports live; segments exclude people without consent |  |
+| 30 Mar 2029 | 3 | Customer and Marketing reports live; segments exclude people without consent |  |
 | 31 May 2029 | 3 | Erasure procedure tested end to end, from the source tools to Power BI | M-TRF-5 |
 | 29 Jun 2029 | 3 | Go/no-go for phase 4; inventory result reviewed against the baseline; the consultant leaves after handing over | M-TRF-12 |
 | 26 Oct 2029 | 4 | Last channel reports (support, web and social dashboards) retired |  |
@@ -201,13 +201,13 @@ The new reports never replace the old ones overnight. For each phase there is a 
 | Phase | Parallel run | What is retired |
 |---|---|---|
 | 1. Sales | August to October 2027 | Excel sales reports by channel and store |
-| 2. Inventory | May to June 2028 | Supply chain stock spreadsheets |
-| 3. Segmentation | May to June 2029 | Marketing spreadsheets built from Klaviyo and Shopify exports |
+| 2. Inventory | April to June 2028 | Supply chain stock spreadsheets |
+| 3. Segmentation | April to June 2029 | Marketing spreadsheets built from Klaviyo and Shopify exports |
 | 4. Remaining | July to October 2029 | Support, web and social dashboards built by hand |
 
 An old report is **retired only when all four conditions are met**:
 
-1. **A replacement exists.** The list of old reports and the Power BI report that replaces each one is the *report replacement map* of Part 5 (mitigation M-CHG-1). Part 5 is the next part of our work (issue #7); this plan gives the map its dates.
+1. **A replacement exists.** The list of old reports and the Power BI report that replaces each one is the *report replacement map* of [Part 5](05-change-management.md), §3 (mitigation M-CHG-1); this plan gives the map its dates.
 2. **The numbers match** within the tolerance (§4) for **two month-end closes** in a row.
 3. **The data owner signs** the retirement (Part 6, RACI).
 4. **The users are trained** on the new report (training plan of Part 5).
@@ -246,7 +246,7 @@ Part 2 asked the transformation plan to give a concrete action, with a phase and
 |---|---|---|
 | R02: customers can't be matched (16) | **M-TRF-2** | Matching rules and stewards in phase 1 (25 Jun 2027); match rate measured monthly; match-rate gate before segments (26 Feb 2029) |
 | R03: dependence on one engineer (16) | **M-TRF-3** | Engineer in post before the build (15 Mar 2027), paired with the consultant; back-up trained (30 Nov 2027); the consultant leaves at gate 3 (29 Jun 2029) and the internal team runs phase 4 alone |
-| R12: inventory benefit doesn't arrive (16) | **M-TRF-12** | Baseline measured July to December 2027, before phase 2; monthly follow-up from May 2028; reviewed at gates 1, 2, 3 and 4 |
+| R12: inventory benefit doesn't arrive (16) | **M-TRF-12** | Baseline measured July to December 2027, before phase 2; monthly follow-up from April 2028; reviewed at gates 1, 2, 3 and 4 |
 | R05: GDPR (15) | **M-TRF-5** | Raw layer restricted, retention and erasure approved in phase 0; DPIA approved (15 Dec 2028) before customer data is loaded (15 Jan 2029); consent flag carried; erasure tested (31 May 2029); EU region from phase 0 |
 
 The other Part 4 mitigations of the register are also dated in the milestone table: M-TRF-4 (budget and scope), M-TRF-6 (contracts), M-TRF-7 (no preview features), M-TRF-8 (POS loading and daily reconciliation), M-TRF-9 (glossary and refresh times) and M-TRF-11 (confirm the ERP). R01, the top risk (teams keep their reports), is handled by M-CHG-1 in Part 5; this plan gives it its dates (§6). A test checks that every Part 4 mitigation of the register has a dated milestone.
@@ -258,7 +258,7 @@ R12 is now as high as R02 and R03 (16): Le Slip Français must recover about 7.2
 - **The dates are our own plan**, starting in January 2027. A slower recruitment of the data engineer would move every phase.
 - **The consultant days and the capacity size come from Part 3**, where they are our estimates, not quotes. If a vendor quote differs, the dates may move, but the order of the phases and the gates stay the same.
 - **The 0.5 % tolerance and the freshness thresholds are our choices.** They should be agreed with the CFO and the data owners in phase 0.
-- **Inventory benefits start a little later than Part 3 assumes.** Part 3 counts them over all of years 2 and 3; in this plan the inventory reports go live at the end of April 2028, so year 2 has about 8 months of benefit. The payback in Part 3 is slightly optimistic.
+- **Inventory benefits start a little later than Part 3 assumes.** Part 3 counts them over all of years 2 and 3; in this plan the inventory reports go live at the end of March 2028, so year 2 has about 9 months of benefit. The payback in Part 3 is slightly optimistic.
 - **Daily stock snapshots on the real platform, weekly in the proof of concept.** Part 0 §4 sizes the synthetic dataset with one snapshot per week to keep it small. The real platform keeps one per day, which is still a small volume.
 - **Only 6 Fivetran connections are counted.** Social media may need one connection per platform (Instagram, Facebook, TikTok); at $5 per connection per month (Part 3), this changes almost nothing.
 

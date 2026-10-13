@@ -17,15 +17,15 @@ M1.8,1,2027-11-30,backup_trained,Back-up trained,A second person trained as back
 M1.9,1,2027-12-17,baseline_done,Baseline done,Six-month inventory baseline (July to December) presented to the steering committee,M-TRF-12,no
 G1,1,2027-12-17,gate_1,Gate 1,Go/no-go for phase 2,,yes
 M2.1,2,2028-01-10,inventory_build,Inventory build starts,Inventory build starts on 9 months of snapshots; Fabric capacity checked with the Capacity Metrics app (it stays at F2 unless the app shows it is too small),,no
-M2.2,2,2028-04-28,inventory_live,Inventory reports live,"Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets",,yes
-M2.3,2,2028-05-31,baseline_followup,Monthly follow-up,First monthly comparison of stock-outs and overstock with the baseline,M-TRF-12,no
+M2.2,2,2028-03-31,inventory_live,Inventory reports live,"Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets",,yes
+M2.3,2,2028-04-28,baseline_followup,Monthly follow-up,First monthly comparison of stock-outs and overstock with the baseline,M-TRF-12,no
 G2,2,2028-06-30,gate_2,Gate 2,Go/no-go for phase 3; inventory result reviewed against the baseline,M-TRF-12,yes
 M3.1,3,2028-09-04,dpia_start,DPIA starts,DPIA for customer segmentation started by the DPO,M-TRF-5,no
 M3.2,3,2028-11-17,klaviyo_loading,Klaviyo loading chosen,"Klaviyo loading chosen: which event types Fivetran syncs, compared with Airbyte (free if self-hosted), because Klaviyo is the biggest Fivetran cost",M-TRF-6,no
 M3.3,3,2028-12-15,dpia_approved,DPIA approved,DPIA approved: customer data can be loaded for segmentation,M-TRF-5,yes
 M3.4,3,2029-01-15,crm_loaded,Customer sources live,"Klaviyo and Zendesk loaded every hour, web analytics and social media every day; consent flag carried from the source",M-TRF-5,no
 M3.5,3,2029-02-26,match_gate,Match-rate gate,"Match-rate gate: at least 90 % of Klaviyo profiles with an order matched, and fewer than 200 pairs waiting for review",M-TRF-2,yes
-M3.6,3,2029-04-30,segments_live,Segments live,Customer and Marketing reports live; segments exclude people without consent,,yes
+M3.6,3,2029-03-30,segments_live,Segments live,Customer and Marketing reports live; segments exclude people without consent,,yes
 M3.7,3,2029-05-31,erasure_test,Erasure tested,"Erasure procedure tested end to end, from the source tools to Power BI",M-TRF-5,no
 G3,3,2029-06-29,gate_3,Gate 3 and consultant leaves,Go/no-go for phase 4; inventory result reviewed against the baseline; the consultant leaves after handing over,M-TRF-12,yes
 M4.1,4,2029-10-26,last_reports,Last reports retired,"Last channel reports (support, web and social dashboards) retired",,yes
