@@ -1,0 +1,27 @@
+name: lsf_poc
+version: "0.1.0"
+config-version: 2
+profile: lsf_poc
+
+model-paths: ["models"]
+test-paths: ["tests"]
+target-path: target
+clean-targets: ["target", "logs"]
+
+flags:
+  send_anonymous_usage_stats: false
+
+vars:
+  vat_rate: 0.20  # French standard VAT: net revenue excludes it (glossary, Part 6)
+
+models:
+  lsf_poc:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts

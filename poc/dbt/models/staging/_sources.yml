@@ -1,0 +1,106 @@
+version: 2
+
+# The 7 sources of the brief, as loaded by poc/ingest.py into one raw schema each.
+# Each source declares its refresh schedule (Part 4, section 5) and freshness thresholds
+# set from it: 15-minute sources warn after 1 h and fail after 3 h, hourly sources 3 h / 6 h,
+# daily sources 26 h / 50 h. _loaded_at is the load time written by the ingestion.
+
+sources:
+  - name: pos
+    description: Store tills of the 2 shops. One small CSV file per store and day, French formats.
+    schema: raw_pos
+    meta: {tool: "Store tills", loaded_by: "Fivetran", refresh: "every 15 minutes"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 1, period: hour}
+        error_after: {count: 3, period: hour}
+    tables:
+      - name: ticket_lines
+        description: One row per ticket line, amounts including VAT, as exported by the tills.
+      - name: z_reports
+        description: End-of-day totals printed by each till (Z report), used to check the sales.
+
+  - name: shopify
+    description: E-commerce on Shopify Plus. JSON records kept whole in `payload`.
+    schema: raw_shopify
+    meta: {tool: "Shopify Plus", loaded_by: "Fivetran", refresh: "every 15 minutes"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 1, period: hour}
+        error_after: {count: 3, period: hour}
+    tables:
+      - name: orders
+      - name: customers
+
+  - name: erp
+    description: Microsoft Dynamics 365 Business Central exports (wholesale, items, stock, production, finance).
+    schema: raw_erp
+    meta: {tool: "Business Central", loaded_by: "Business Central link to Fabric", refresh: "every night"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 26, period: hour}
+        error_after: {count: 50, period: hour}
+    tables:
+      - name: items
+      - name: locations
+      - name: wholesale_customers
+      - name: sales_lines
+      - name: production_orders
+      - name: gl_entries
+      - name: stock
+        description: Full stock snapshot per SKU and location (weekly in the proof of concept, daily in production).
+
+  - name: klaviyo
+    description: CRM and email campaigns on Klaviyo (JSON:API records).
+    schema: raw_klaviyo
+    meta: {tool: "Klaviyo", loaded_by: "Fivetran", refresh: "every hour"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 3, period: hour}
+        error_after: {count: 6, period: hour}
+    tables:
+      - name: profiles
+      - name: campaigns
+      - name: events
+
+  - name: zendesk
+    description: Customer support tickets on Zendesk.
+    schema: raw_zendesk
+    meta: {tool: "Zendesk", loaded_by: "Fivetran", refresh: "every hour"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 3, period: hour}
+        error_after: {count: 6, period: hour}
+    tables:
+      - name: tickets
+
+  - name: ga4
+    description: Google Analytics 4 daily totals by traffic channel (only consenting visitors).
+    schema: raw_ga4
+    meta: {tool: "Google Analytics 4", loaded_by: "Fivetran", refresh: "every day"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 26, period: hour}
+        error_after: {count: 50, period: hour}
+    tables:
+      - name: daily_traffic
+
+  - name: social
+    description: Daily account totals from Instagram, Facebook and TikTok, each in its own format.
+    schema: raw_social
+    meta: {tool: "Instagram, Facebook, TikTok", loaded_by: "Fivetran", refresh: "every day"}
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 26, period: hour}
+        error_after: {count: 50, period: hour}
+    tables:
+      - name: instagram
+      - name: facebook
+      - name: tiktok

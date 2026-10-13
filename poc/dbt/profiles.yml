@@ -1,0 +1,8 @@
+lsf_poc:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      # set by poc/run.py; the default works when dbt is run from poc/dbt
+      path: "{{ env_var('LSF_POC_WAREHOUSE', '../data/warehouse.duckdb') }}"
+      threads: 4

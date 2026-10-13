@@ -1,2 +1,10 @@
 __pycache__/
 *.pyc
+
+# proof of concept: environment, generated data and dbt outputs
+poc/.venv/
+poc/data/
+poc/dbt/target/
+poc/dbt/logs/
+poc/dbt/dbt_packages/
+poc/dbt/.user.yml

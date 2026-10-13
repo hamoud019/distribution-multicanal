@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fct_pos_daily_sales
+    description: >
+      Daily sales of each own store (Paris Marais, Toulouse). One row per store and day with at least one ticket.
+      Checked every run against the tills' end-of-day Z reports (test assert_pos_daily_sales_match_z_reports).
+    columns:
+      - name: store_day_key
+        description: Store code and date, the key of the table.
+        data_tests: [unique, not_null]
+      - name: sale_date
+        description: "Date (glossary): calendar day in Paris time."
+        data_tests: [not_null]
+      - name: location_code
+        description: "Location (glossary): the store."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ST-PAR", "ST-TLS"]
+      - name: tickets
+        description: Number of till tickets ("Order" in the glossary for the Store channel).
+      - name: units
+        description: Items sold, minus items returned in store.
+      - name: amount_paid_incl_vat
+        description: What customers paid, including VAT, after discounts and returns (the till's total).
+      - name: net_revenue
+        description: "Net revenue (glossary): after discounts and returns, excluding VAT."

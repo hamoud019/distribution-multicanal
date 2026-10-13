@@ -16,6 +16,16 @@ Spec and work breakdown: issue #1.
 | 5 | [Change management plan](docs/deliverables/05-change-management.md) | #7 |
 | 6 | [Data governance and GDPR](docs/deliverables/06-governance-gdpr.md) | #5 |
 
+## Proof of concept
+
+A local version of the chosen platform on synthetic data: the 7 sources, a raw layer, and dbt models up to a first report table. One command, no cloud account (Python 3.10 to 3.13):
+
+```
+py -3.12 poc/run.py
+```
+
+See [poc/README.md](poc/README.md).
+
 ## Governance rules
 
 The glossary, planned report tables, personal-data inventory, retention periods, erasure steps and access model are CSV files in [`governance/`](governance), checked by `analysis/test_governance.py`.

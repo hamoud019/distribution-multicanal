@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: stg_pos__ticket_lines
+    description: One row per till line. Amounts include VAT, as printed on the ticket.
+    columns:
+      - name: ticket_id
+        data_tests: [not_null]
+      - name: sold_at
+        description: Local Paris time of the sale.
+        data_tests: [not_null]
+      - name: location_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__locations')
+                field: location_code
+      - name: quantity
+        description: Negative for an item returned in store.
+      - name: has_e_receipt
+        description: True when the customer asked for an e-receipt by email. The email itself stays in the raw layer.
+
+  - name: stg_pos__z_reports
+    description: One row per store and day, from the till's end-of-day report.
+    columns:
+      - name: store_day_key
+        description: Store code and date. One Z report per store and day.
+        data_tests: [unique, not_null]
+      - name: sale_date
+        data_tests: [not_null]
+

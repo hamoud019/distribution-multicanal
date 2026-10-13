@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: stg_erp__locations
+    description: Factory/warehouse and own stores, from Business Central.
+    columns:
+      - name: location_code
+        data_tests: [unique, not_null]
