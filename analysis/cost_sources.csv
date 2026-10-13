@@ -15,3 +15,5 @@ S-FIVETRAN,Fivetran pricing (Standard plan),500 USD per million MAR per month; 5
 S-PL300,PLB Power BI PL-300 course (3 days),2390 EUR excl. VAT per person,https://www.plb.fr/formation/power-bi-analyse,2026-09-26
 S-IHL,IHL Group inventory distortion research 2025,Out-of-stocks + overstocks = 6.5 % of global retail sales,https://www.ihlservices.com/news/analyst-corner/2025/09/retail-inventory-crisis-persists-despite-172-billion-in-improvements/,2026-09-26
 S-DBT,dbt Core (dbt Labs),Open source under the Apache 2.0 licence: free to use,https://github.com/dbt-labs/dbt-core,2026-09-26
+S-LSF,Le Slip Francais revenue 2025 (IPO documents),21.1 M EUR,https://pea.fr/analyses/ipo-le-slip-francais/,2026-09-26
+S-HDFS,Apache Hadoop HDFS default configuration,dfs.replication = 3 (3 copies of every block by default),https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml,2026-10-13

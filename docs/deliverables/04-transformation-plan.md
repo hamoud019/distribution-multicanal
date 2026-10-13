@@ -73,7 +73,7 @@ gantt
   Project closed :crit, milestone, 2029-12-21, 0d
 ```
 
-**Why three years, when one use case only needs 30 consultant days?** The build itself could go faster. The limit is the people: Le Slip Français has 69 employees, and the same managers (CFO, sales, supply chain, marketing) must define rules, test reports and change their habits. One change at a time is what a small company can absorb. It is also what Part 3 assumes: manual work falls a little each year (from 1.2 analysts today to 1.0, 0.8 and 0.6), and inventory benefits are counted in years 2 and 3.
+**Why three years, when one use case only needs 30 consultant days?** The build itself could go faster. The limit is the people: Le Slip Français has 69 employees, and the same managers (CFO, sales, supply chain, marketing) must define rules, test reports and change their habits. One change at a time is what a small company can absorb. It is also what Part 3 assumes: manual work falls a little each year (from 0.6 analysts today to 0.5, 0.4 and 0.3), and inventory benefits are counted in years 2 and 3.
 
 The gaps between phases are planned: the Christmas holidays (end of 2027) and the summer of 2028, when the DPO prepares the impact assessment and the team stabilizes the inventory reports.
 
@@ -98,7 +98,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 
 ### Phase 2: Inventory optimization (January to June 2028)
 
-- The Fabric capacity grows from F2 to F4, as costed in Part 3 for years 2 and 3.
+- The Fabric capacity stays at F2, as costed in Part 3. The Capacity Metrics app (§7) shows if the inventory reports need the next size, F4.
 - The Inventory mart uses the stock snapshots, the production data of the factories, and the sales of all channels already loaded in phase 1. It shows stock cover, sell-through, and the lists of stock-outs and overstock defined in the glossary.
 - From May, stock-outs and overstock are compared with the baseline **every month**, and the result is reviewed at gate 2 (M-TRF-12).
 
@@ -136,7 +136,7 @@ The gaps between phases are planned: the Christmas holidays (end of 2027) and th
 | 30 Nov 2027 | 1 | A second person trained as back-up for the data engineer | M-TRF-3 |
 | 17 Dec 2027 | 1 | Six-month inventory baseline (July to December) presented to the steering committee | M-TRF-12 |
 | 17 Dec 2027 | 1 | Go/no-go for phase 2 |  |
-| 10 Jan 2028 | 2 | Fabric capacity raised from F2 to F4; inventory build starts on 9 months of snapshots |  |
+| 10 Jan 2028 | 2 | Inventory build starts on 9 months of snapshots; Fabric capacity checked with the Capacity Metrics app (it stays at F2 unless the app shows it is too small) |  |
 | 28 Apr 2028 | 2 | Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets |  |
 | 31 May 2028 | 2 | First monthly comparison of stock-outs and overstock with the baseline | M-TRF-12 |
 | 30 Jun 2028 | 2 | Go/no-go for phase 3; inventory result reviewed against the baseline | M-TRF-12 |
@@ -245,16 +245,16 @@ Part 2 asked the transformation plan to give a concrete action, with a phase and
 | R02: customers can't be matched (16) | **M-TRF-2** | Matching rules and stewards in phase 1 (25 Jun 2027); match rate measured monthly; match-rate gate before segments (26 Feb 2029) |
 | R03: dependence on one engineer (16) | **M-TRF-3** | Engineer in post before the build (15 Mar 2027), paired with the consultant; back-up trained (30 Nov 2027); the consultant leaves at gate 3 (29 Jun 2029) and the internal team runs phase 4 alone |
 | R05: GDPR (15) | **M-TRF-5** | Raw layer restricted, retention and erasure approved in phase 0; DPIA approved (15 Dec 2028) before customer data is loaded (15 Jan 2029); consent flag carried; erasure tested (31 May 2029); EU region from phase 0 |
-| R12: inventory benefit doesn't arrive (12) | **M-TRF-12** | Baseline measured July to December 2027, before phase 2; monthly follow-up from May 2028; reviewed at gates 1, 2, 3 and 4 |
+| R12: inventory benefit doesn't arrive (16) | **M-TRF-12** | Baseline measured July to December 2027, before phase 2; monthly follow-up from May 2028; reviewed at gates 1, 2, 3 and 4 |
 
 The other Part 4 mitigations of the register are also dated in the milestone table: M-TRF-4 (budget and scope), M-TRF-6 (contracts), M-TRF-7 (no preview features), M-TRF-8 (POS loading and daily reconciliation), M-TRF-9 (glossary and refresh times) and M-TRF-11 (confirm the ERP). R01, the top risk (teams keep their reports), is handled by M-CHG-1 in Part 5; this plan gives it its dates (§6). A test checks that every Part 4 mitigation of the register has a dated milestone.
 
-R08 (late POS data from "some of the 30 stores") was written for the old assumption of 30 stores. Le Slip Français has 2 stores, so this risk is smaller, but the same mitigation applies.
+R12 is now as high as R02 and R03 (16): Le Slip Français must recover about 7.2 % of its inventory losses for the project to pay back (Part 3, §4). This is why the baseline and the monthly follow-up start a whole phase before the inventory reports.
 
 ## 9. Limits
 
 - **The dates are our own plan**, starting in January 2027. A slower recruitment of the data engineer would move every phase.
-- **Parts 1–3 still use the old size assumptions** (about 30 stores, 70 Power BI users), as Part 0 §5 explains. This plan takes its consultant days and capacity sizes from Part 3. If Part 3 is resized for Le Slip Français, the days may fall, but the order of the phases and the gates stay the same.
+- **The consultant days and the capacity size come from Part 3**, where they are our estimates, not quotes. If a vendor quote differs, the dates may move, but the order of the phases and the gates stay the same.
 - **The 0.5 % tolerance and the freshness thresholds are our choices.** They should be agreed with the CFO and the data owners in phase 0.
 - **Inventory benefits start a little later than Part 3 assumes.** Part 3 counts them over all of years 2 and 3; in this plan the inventory reports go live at the end of April 2028, so year 2 has about 8 months of benefit. The payback in Part 3 is slightly optimistic.
 - **Daily stock snapshots on the real platform, weekly in the proof of concept.** Part 0 §4 sizes the synthetic dataset with one snapshot per week to keep it small. The real platform keeps one per day, which is still a small volume.

@@ -1,0 +1,6 @@
+source,group,rows_per_month,estimate
+E-commerce (Shopify),sales,120000,"About 20,000 orders a month x 6 rows each (order, 2 lines on average, payment, shipment, customer)"
+POS,sales,10000,"About 2,500 tickets a month x 4 rows each"
+CRM (Klaviyo),other,3200000,"Email events of about 300,000 subscribed profiles (35 % of the 850,000 customers, assumption) x 8 campaigns a month: 2.4 million received, 0.72 million opened (30 %, assumption), 0.05 million clicked; plus about 30,000 profile changes"
+Customer support (Zendesk),other,7000,"About 1,000 tickets a month with their comments"
+"Web analytics, social media",other,3000,Daily totals only (Part 6)

@@ -16,7 +16,7 @@ M1.7,1,2027-10-29,sales_retired,Old sales reports retired,Old sales reports reti
 M1.8,1,2027-11-30,backup_trained,Back-up trained,A second person trained as back-up for the data engineer,M-TRF-3,no
 M1.9,1,2027-12-17,baseline_done,Baseline done,Six-month inventory baseline (July to December) presented to the steering committee,M-TRF-12,no
 G1,1,2027-12-17,gate_1,Gate 1,Go/no-go for phase 2,,yes
-M2.1,2,2028-01-10,capacity_f4,F4 capacity,Fabric capacity raised from F2 to F4; inventory build starts on 9 months of snapshots,,no
+M2.1,2,2028-01-10,inventory_build,Inventory build starts,"Inventory build starts on 9 months of snapshots; Fabric capacity checked with the Capacity Metrics app (it stays at F2 unless the app shows it is too small)",,no
 M2.2,2,2028-04-28,inventory_live,Inventory reports live,"Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets",,yes
 M2.3,2,2028-05-31,baseline_followup,Monthly follow-up,First monthly comparison of stock-outs and overstock with the baseline,M-TRF-12,no
 G2,2,2028-06-30,gate_2,Gate 2,Go/no-go for phase 3; inventory result reviewed against the baseline,M-TRF-12,yes

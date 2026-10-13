@@ -1,7 +1,11 @@
+import csv
 import unittest
 from pathlib import Path
 
-from costing import OPTIONS, Line, break_even_inventory_gain, cost_scores, load_lines, load_parameters, totals
+from costing import (
+    OPTIONS, Line, break_even_by_option, break_even_inventory_gain, by_driver, cost_scores, inventory_distortion,
+    load_lines, load_parameters, totals,
+)
 
 HERE = Path(__file__).parent
 RATE = 2.0  # USD per EUR, for readable test numbers
@@ -78,22 +82,87 @@ class PublishedFigures(unittest.TestCase):
     def test_three_year_tco_per_option(self):
         self.assertEqual(
             {o: self.tco(o) for o in OPTIONS},
-            {"datamart_onprem": 402_043, "datamart_cloud": 266_842, "lakehouse_onprem": 566_811, "lakehouse_cloud": 257_243},
+            {"datamart_onprem": 334_302, "datamart_cloud": 243_201, "lakehouse_onprem": 534_372, "lakehouse_cloud": 235_391},
         )
 
     def test_current_situation_costs(self):
-        self.assertEqual(round(totals(self.lines, "current", self.rate).three_years), 234_900)
+        self.assertEqual(round(totals(self.lines, "current", self.rate).three_years), 117_450)
 
     def test_lakehouse_cloud_year_by_year_including_manual_work(self):
         t = totals(self.lines, "lakehouse_cloud", self.rate)
-        self.assertEqual([round(y) for y in t.by_year], [174_539, 125_850, 113_454])
+        self.assertEqual([round(y) for y in t.by_year], [122_145, 90_479, 101_067])
 
     def test_cost_scores_fed_back_to_architecture_matrix(self):
         tcos = {o: self.tco(o) for o in OPTIONS}
         self.assertEqual(
             cost_scores(tcos),
-            {"datamart_onprem": 3, "datamart_cloud": 5, "lakehouse_onprem": 1, "lakehouse_cloud": 5},
+            {"datamart_onprem": 4, "datamart_cloud": 5, "lakehouse_onprem": 1, "lakehouse_cloud": 5},
         )
+
+    def test_inventory_break_even_per_option(self):
+        self.assertEqual(round(inventory_distortion(self.params)), 1_371_500)
+        gains = {o: round(100 * g, 1) for o, g in break_even_by_option(self.lines, self.params).items()}
+        self.assertEqual(gains, {"datamart_onprem": 10.8, "datamart_cloud": 7.4, "lakehouse_onprem": 37.5,
+                                 "lakehouse_cloud": 7.2})
+
+    def test_fivetran_rows_follow_the_volume_estimates(self):
+        with open(HERE / "fivetran_rows.csv", newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        sales = sum(int(r["rows_per_month"]) for r in rows if r["group"] == "sales") / 1e6
+        every = sum(int(r["rows_per_month"]) for r in rows) / 1e6
+        self.assertEqual((round(sales, 2), round(every, 2)), (0.13, 3.34))
+        mar = {l.option: l.qty for l in self.lines if l.item.startswith("Fivetran rows")}
+        # the lakehouse loads each source once; each new datamart loads the sales sources again
+        expected = {
+            "lakehouse_cloud": (12 * sales, 12 * sales, 12 * every),
+            "datamart_cloud": (12 * sales, 12 * 2 * sales, 12 * (2 * sales + every)),
+        }
+        for option, qty in expected.items():
+            self.assertEqual(mar[option], tuple(round(q, 2) for q in qty), option)
+
+
+DOCS = HERE.parent / "docs" / "deliverables"
+
+
+def doc(name):
+    return (DOCS / name).read_text(encoding="utf-8")
+
+
+class QuotedFigures(unittest.TestCase):
+    """Figures quoted in the prose of Parts 1-3 that come from the cost model."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.lines = load_lines(HERE / "cost_lines.csv")
+        cls.params = load_parameters(HERE / "cost_parameters.csv")
+        cls.rate = cls.params["usd_per_eur"]
+        cls.lakehouse = totals(cls.lines, "lakehouse_cloud", cls.rate)
+
+    def test_costing_quotes_every_tco_and_the_break_even(self):
+        part3 = doc("03-costing.md")
+        for o in OPTIONS:
+            self.assertIn(f"**{round(totals(self.lines, o, self.rate).tco):,}**", part3, o)
+        gain = break_even_by_option(self.lines, self.params)["lakehouse_cloud"]
+        self.assertIn(f"**{100 * gain:.1f} %**", part3)
+        self.assertIn(f"roughly {round(gain * inventory_distortion(self.params), -3):,.0f} € per year", part3)
+
+    def test_costing_quotes_the_platform_cost(self):
+        platform = sum(sum(totals([l], "lakehouse_cloud", self.rate).by_year) for l in self.lines
+                       if l.option == "lakehouse_cloud" and l.item.startswith(("Fabric", "OneLake", "Fivetran")))
+        self.assertIn(f"≈ {round(platform, -2):,.0f} € in 3 years", doc("03-costing.md"))
+
+    def test_swot_quotes_the_share_of_people_and_the_contingency(self):
+        split = by_driver(self.lines, "lakehouse_cloud", self.rate)
+        people = (split["staff"] + split["build"]) / self.lakehouse.tco
+        part2 = doc("02-swot-risks.md")
+        self.assertIn(f"{100 * people:.0f} % of the 3-year cost is staff and consultants", part2)
+        self.assertIn(f"about {0.15 * self.lakehouse.tco / 1000:.0f} k€, on top of the "
+                      f"{self.lakehouse.tco / 1000:.0f} k€ of Part 3", part2)
+
+    def test_architecture_quotes_the_power_bi_cost(self):
+        (pbi,) = [l for l in self.lines if l.option == "lakehouse_cloud" and l.item.startswith("Power BI Pro")]
+        self.assertIn(f"{pbi.qty[0]:.0f} × $14 × 12 ≈ ${pbi.qty[0] * pbi.unit_price:,.0f}/year",
+                      doc("01-architecture-options.md"))
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 *Case 6: Urbanization, Datamart / Datalake (multi-channel distribution)*
 
-The brief asks for a **"SWOT of the proposed solution, and risk assessment"**. The proposed solution is the one chosen in [Part 1](01-architecture-options.md): a **cloud lakehouse on Microsoft Fabric**, built one use case at a time (sales → inventory → segmentation), with Fivetran, dbt and Power BI. The costs come from [Part 3](03-costing.md).
+The brief asks for a **"SWOT of the proposed solution, and risk assessment"**. The company is [Le Slip Français](00-company-profile.md). The proposed solution is the one chosen in [Part 1](01-architecture-options.md): a **cloud lakehouse on Microsoft Fabric**, built one use case at a time (sales → inventory → segmentation), with Fivetran, dbt and Power BI. The costs come from [Part 3](03-costing.md).
 
 ## 1. SWOT
 
@@ -11,23 +11,23 @@ In a SWOT, **strengths** and **weaknesses** are about the solution itself (inter
 | | Positive | Negative |
 |---|---|---|
 | **Internal** | **Strengths** | **Weaknesses** |
-| | **S1. One place for the 7 sources.** Store and online sales finally sit in the same tables, so the company can compare channels and build the single customer view the brief asks for. | **W1. It depends on people.** 73 % of the 3-year cost is staff and consultants (Part 3, §5), and the platform relies on 0.5 of an internal data engineer. |
-| | **S2. The cheapest option over 3 years.** 257 k€, against 267 k€ for the cloud datamart and 402–567 k€ on-premise (Part 3, §3). The platform itself costs only about 15 k€. | **W2. Fabric is young.** Some features are still in preview, and the dbt adapter for the Fabric lakehouse is not generally available yet [1]. |
-| | **S3. It fits the company's tools.** Business Central connects directly to Fabric [2], and Power BI feels familiar to teams who work in Excel. | **W3. It does not pay for itself on time savings alone.** It must also improve inventory decisions (about 2.3 % of inventory losses, Part 3, §4). |
+| | **S1. One place for the 7 sources.** Store and online sales finally sit in the same tables, so the company can compare channels and build the single customer view the brief asks for. | **W1. It depends on people.** 79 % of the 3-year cost is staff and consultants (Part 3, §5), and the platform relies on 0.5 of an internal data engineer. |
+| | **S2. The cheapest option over 3 years.** 235 k€, against 243 k€ for the cloud datamart and 334–534 k€ on-premise (Part 3, §3). The platform itself costs only about 26 k€. | **W2. Fabric is young.** Some features are still in preview, and the dbt adapter for the Fabric lakehouse is not generally available yet [1]. |
+| | **S3. It fits the company's tools.** Business Central connects directly to Fabric [2], and Power BI feels familiar to teams who work in Excel. | **W3. It does not pay for itself on time savings alone.** It must also improve inventory decisions: recover about 7.2 % of inventory losses, around 98 k€ a year (Part 3, §4). For a company of this size, that is a demanding target. |
 | | **S4. Value arrives step by step.** The first sales reports arrive in year 1, and each new use case reuses the data already loaded. | **W4. No true real-time.** POS data is loaded in small batches, not instantly, although the brief describes POS as "real-time". This is enough for our three use cases but not for live store replenishment. |
 | | **S5. Not locked in.** Data is stored in the open Delta format [3] and transformations are plain SQL in dbt, so they could move to another platform. | **W5. The choice depends on the ERP.** If the ERP is SAP Business One and not Business Central, Fabric loses its main advantage (Part 1, §7). |
 | **External** | **Opportunities** | **Threats** |
-| | **O1. Inventory losses are large.** Stock-outs and overstock cost retailers about 6.5 % of sales [4], around 3.9 M€ a year for our assumed retailer. Recovering a small part of this pays for the whole project. | **T1. Vendor price increases.** Power BI Pro went from $10 to $14 per user in April 2025 (+40 %) [5], and Fivetran changed how it bills in 2025 and 2026 [6]. |
+| | **O1. Inventory losses are large.** Stock-outs and overstock cost retailers about 6.5 % of sales [4], around 1.4 M€ a year for Le Slip Français. As a manufacturer selling many sizes and colours through three channels, it has a lot to gain from better stock decisions. | **T1. Vendor price increases.** Power BI Pro went from $10 to $14 per user in April 2025 (+40 %) [5], and Fivetran changed how it bills in 2025 and 2026 [6]. |
 | | **O2. Cross-channel marketing.** With CRM, e-commerce and store loyalty data together, marketing can target customers who buy in store *and* online, and measure campaigns on real sales. | **T2. GDPR sanctions.** Processing customer or tracking data without a legal basis can be fined up to 20 M€ or 4 % of worldwide turnover [7]. |
 | | **O3. Better customer service.** Support agents can see a customer's purchases next to their Zendesk/Freshdesk tickets and spot products with recurring problems. | **T3. Resistance to change.** The brief itself warns that teams resist giving up their channel-specific reports. |
 | | **O4. Future projects on the same data.** Demand forecasting or recommendations could be built later without a new platform. | **T4. Poor source data.** Bad data quality costs organizations $12.9 M a year on average (Gartner) [8]. Our result is only as good as the data in the 7 source systems. |
-| | | **T5. Scarce skills.** Experienced data engineers are paid 46–65 k€ gross a year in France [9], and a small retailer competes with bigger companies to hire them. |
+| | | **T5. Scarce skills.** Experienced data engineers are paid 46–65 k€ gross a year in France [9], and a 69-person company competes with bigger companies to hire them. |
 
 ### What we learn from the SWOT
 
 - The **strengths are mostly technical and financial**: the solution is cheap, fits the existing tools and is not locked in.
-- The **weaknesses and threats are mostly human**: people and skills (W1, T5), resistance (T3) and data quality (T4). So the biggest risks are not about technology. This is why the risk register below puts adoption and data quality first.
-- The **main opportunity (O1) is also the condition for success (W3)**: the project only pays back if the inventory use case really improves stock decisions.
+- The **weaknesses and threats are mostly human**: people and skills (W1, T5), resistance (T3) and data quality (T4). So the biggest risks are not about technology. This is why the risk register below puts adoption, data quality and skills at the top, next to the inventory benefit (R12).
+- The **main opportunity (O1) is also the condition for success (W3)**: the project only pays back if the inventory use case really improves stock decisions. For a company of Le Slip Français's size this is the weakest point of the business case.
 
 ## 2. Risk register
 
@@ -48,14 +48,14 @@ Each risk has an **owner**: the person who watches it and acts if it happens. Ow
 | R01 | Adoption | Teams keep their own channel reports in Excel and don't use the new platform, so the silos stay | 4 | 5 | **20** | Map every channel report to the Power BI report that replaces it, then retire them one by one on dates set by management; one data champion per department | General management |
 | R02 | Data quality | Customers can't be matched reliably across store e-receipts, e-commerce, CRM and support, so the single customer view and the segments are wrong | 4 | 4 | **16** | Matching rules and data stewards defined in phase 1; match rate measured with dbt tests; segmentation only starts when the target is reached | Marketing director |
 | R03 | Skills | Everything depends on 0.5 of an internal data engineer; if that person leaves, nobody can maintain the pipelines | 4 | 4 | **16** | Recruit or train the engineer **before** the build and pair them with the consultant; all logic documented in dbt; a trained back-up person | IT manager |
+| R12 | Budget | The expected benefit doesn't arrive: inventory must recover about 7.2 % of inventory losses (about 98 k€ a year) | 4 | 4 | **16** | Measure stock-outs and overstock **before** phase 2 as a baseline; follow them monthly; review at each phase gate | Supply chain director |
 | R05 | GDPR | Customer or web-tracking data processed without valid consent, or kept too long | 3 | 5 | **15** | Impact assessment (DPIA) before segmentation; raw layer restricted to IT; consent flag carried to the customer tables; retention periods; erasure procedure; EU region only | DPO |
-| R12 | Budget | The expected benefit doesn't arrive: inventory must recover about 2.3 % of inventory losses | 3 | 4 | **12** | Measure stock-outs and overstock **before** phase 2 as a baseline; follow them monthly; review at each phase gate | Supply chain director |
-| R04 | Budget | Building takes more consultant days than we estimated | 4 | 3 | **12** | Fixed scope and a go/no-go gate per use case; a 15 % contingency (about 39 k€, on top of the 257 k€ of Part 3). Part 3 shows +50 % build days adds about 33 k€ and does not change the choice | CFO |
+| R04 | Budget | Building takes more consultant days than we estimated | 4 | 3 | **12** | Fixed scope and a go/no-go gate per use case; a 15 % contingency (about 35 k€, on top of the 235 k€ of Part 3). Part 3 shows +50 % build days adds about 33 k€ and does not change the choice | CFO |
 | R09 | Data quality | Sources refresh at different times (POS during the day, ERP once a day), so reports disagree and users lose trust | 4 | 3 | **12** | Show the last refresh time on every report; one business glossary; reconcile sales with ERP finance figures | CFO |
 | R07 | Technical | Some Fabric features are still in preview; the lakehouse dbt adapter is not generally available [1] | 3 | 3 | **9** | Use the Fabric Warehouse with its supported dbt adapter; no preview features in production | Data engineer |
-| R08 | Technical | Store network problems: POS data from some of the 30 stores arrives late or incomplete | 3 | 3 | **9** | Small batches with retries; freshness tests per store; daily reconciliation with ERP totals | IT manager |
 | R10 | Adoption | Business users lack the skills for self-service analytics | 3 | 3 | **9** | PL-300 training for creators, workshops for readers, help sessions with the data champions | HR / training manager |
 | R06 | Vendor | Vendors raise their prices (Power BI +40 % in 2025 [5]; Fivetran pricing changes [6]) | 4 | 2 | **8** | 1-year reservations and annual contracts; dbt keeps the logic portable; Airbyte as back-up for Fivetran | IT manager |
+| R08 | Technical | Store network problems: POS data from one of the 2 stores arrives late or incomplete | 2 | 3 | **6** | Small batches with retries; freshness tests per store; daily reconciliation with ERP totals | IT manager |
 | R11 | Vendor | The ERP is SAP Business One, so Fabric loses its main advantage | 2 | 3 | **6** | Confirm the ERP at kick-off; if it is SAP B1, ask Snowflake, BigQuery and Microsoft for quotes | IT manager |
 
 The register covers all the categories we were asked to consider: technical (R07, R08), data quality (R02, R09), GDPR (R05), budget (R04, R12), skills (R03), adoption (R01, R10) and vendor (R06, R11).
@@ -65,12 +65,17 @@ The register covers all the categories we were asked to consider: technical (R07
 | Impact ↓ / Likelihood → | 1 rare | 2 unlikely | 3 possible | 4 likely | 5 almost certain |
 |---|---|---|---|---|---|
 | **5 critical** | | | R05 | **R01** | |
-| **4 major** | | | R12 | R02, R03 | |
-| **3 moderate** | | R11 | R07, R08, R10 | R04, R09 | |
+| **4 major** | | | | R02, R03, R12 | |
+| **3 moderate** | | R08, R11 | R07, R10 | R04, R09 | |
 | **2 minor** | | | | R06 | |
 | **1 small** | | | | | |
 
 Most risks sit in the "possible / likely" columns with moderate to major impact. None is almost certain, and none is small enough to ignore.
+
+**What changed when we resized the study for Le Slip Français.** Our first version used an imaginary retailer of about 30 stores and 60 M€. Two scores changed:
+
+- **R12 went from "possible" (3) to "likely" (4)**, so from 12 to 16. The big retailer only needed to recover 2.3 % of its inventory losses; Le Slip Français needs 7.2 % (Part 3, §4), because the platform costs almost the same while the losses are smaller.
+- **R08 went from "possible" (3) to "unlikely" (2)**, so from 9 to 6. There are only 2 stores to connect instead of 30.
 
 ## 3. The top 5 risks and where they are handled
 
@@ -81,8 +86,8 @@ The five highest-scoring risks must have a concrete action in the next two parts
 | 1 | R01: teams keep their channel reports | 20 | **M-CHG-1**: report replacement map + retirement dates + data champions | Part 5 (change management) |
 | 2 | R02: customers can't be matched | 16 | **M-TRF-2**: matching rules and stewards in phase 1; match-rate gate before segmentation | Part 4 (transformation plan) |
 | 3 | R03: dependence on one engineer | 16 | **M-TRF-3**: hire or train before the build, pairing, back-up person | Part 4 (transformation plan) + Part 5 (training) |
-| 4 | R05: GDPR | 15 | **M-TRF-5**: DPIA, restricted raw layer, consent, retention, erasure | Part 4 (transformation plan) |
-| 5 | R12: inventory benefit doesn't arrive | 12 | **M-TRF-12**: baseline before phase 2, monthly follow-up, gate reviews | Part 4 (transformation plan) |
+| 4 | R12: inventory benefit doesn't arrive | 16 | **M-TRF-12**: baseline before phase 2, monthly follow-up, gate reviews | Part 4 (transformation plan) |
+| 5 | R05: GDPR | 15 | **M-TRF-5**: DPIA, restricted raw layer, consent, retention, erasure | Part 4 (transformation plan) |
 
 Note that **four of the five top risks are about people and data, not technology**. This confirms what the SWOT showed: the success of the project depends more on change management and governance than on the choice of tool.
 

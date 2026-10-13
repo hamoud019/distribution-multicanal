@@ -33,13 +33,14 @@ The brief asks us to choose:
 
 ## 2. Our assumptions
 
-The brief does not give the company's size, so we assume a medium-sized retailer:
+The brief does not give the company's size, so we apply the case to **Le Slip Français** ([Part 0](00-company-profile.md)), using its public figures:
 
-- about 30 stores and one webshop;
-- about 2 million store sales lines and 0.4 million online order lines per year;
-- less than 1 TB of data after 3 years;
-- about 70 people reading reports, 10 of whom build them;
-- a small IT team that knows SQL but not big-data tools;
+- **21.1 M€ of revenue** in 2025 and **69 employees**;
+- three channels: the **website** (72 % of revenue in 2025, 88 % in the first half of 2026), **2 own stores**, and **wholesale** to about a hundred Carrefour hypermarkets;
+- about **241,000 web orders, 30,000 store tickets and 5,200 wholesale orders a year**, and 850,000 customers (Part 0, §4);
+- much less than 1 TB of data after 3 years (about 130 GB by our estimate, Part 3);
+- about **25 people reading reports** (a third of the staff), **5** of whom build them, one in each business service of the brief (IT's reports are built by the data engineer): this is our assumption;
+- a small IT team that knows SQL but not big-data tools (assumption);
 - a company in the EU, so the **GDPR** applies, as the brief notes.
 
 ## 3. The four options
@@ -77,8 +78,8 @@ Speed, integration and cost get the highest weights (20 each), because the brief
 | Covers the 3 use cases | 15 | 2 | 2 | 4 | **5** |
 | Governance & GDPR | 15 | 3 | 2 | **4** | **4** |
 | Self-service | 10 | 3 | **4** | 3 | **4** |
-| Cost (from Part 3) | 20 | 3 | **5** | 1 | **5** |
-| **Total / 100** | | **53** | **72** | **50** | **87** |
+| Cost (from Part 3) | 20 | 4 | **5** | 1 | **5** |
+| **Total / 100** | | **57** | **72** | **50** | **87** |
 
 ### Why we gave these scores
 
@@ -87,7 +88,7 @@ Speed, integration and cost get the highest weights (20 each), because the brief
 - **Covers the 3 use cases.** A departmental datamart only serves one department. To cover sales, marketing and supply chain we would have to build three datamarts, which **recreates the silos** the brief wants to remove. A lakehouse holds all the data in one place.
 - **Governance & GDPR.** To get a single customer view (MDM), customer data from POS, e-commerce, CRM and support must be matched in **one place**. Several datamarts mean several copies of personal data, so more places to protect and to delete from when a customer asks (the GDPR right to erasure). In the cloud we can choose an EU region, which avoids transferring data outside the EU [15].
 - **Self-service.** Business users never see the raw data in either case; they use the final tables through a BI tool. Cloud BI tools connect directly to cloud platforms, whereas on-premise needs an extra gateway.
-- **Cost.** These scores come from the 3-year costing in [Part 3](03-costing.md): the cheapest option gets 5, the most expensive 1, and the others fall in between. The cloud lakehouse (€257k) and the cloud datamart (€267k) are almost equal. The cloud datamart is cheaper in year 1, but it loads the same sales data again for each new datamart. The on-premise options cost more because of servers, licences (for example SQL Server Standard at $3,945 per 2 cores [14]) and the staff needed to run them: €402k for the on-premise datamart and €567k for the on-premise lakehouse.
+- **Cost.** These scores come from the 3-year costing in [Part 3](03-costing.md): the cheapest option gets 5, the most expensive 1, and the others fall in between. The cloud lakehouse (€235k) and the cloud datamart (€243k) are almost equal. The cloud datamart is cheaper in year 1, but it loads the same sales data again for each new datamart. The on-premise options cost more because of servers, licences (for example SQL Server Standard at $3,945 per 2 cores [14]) and the staff needed to run them: €334k for the on-premise datamart and €534k for the on-premise lakehouse.
 
 ### Does the result change if we change the weights?
 
@@ -95,8 +96,8 @@ We tested a second weighting where **speed is the priority** (speed 35, cost 25,
 
 | Weighting | Result |
 |---|---|
-| Our weighting (§4) | **④ Lakehouse cloud 87** > ② Datamart cloud 72 > ① 53 > ③ 50 |
-| Speed first | **② Datamart cloud 83** > ④ Lakehouse cloud 82 > ① 56 > ③ 39 |
+| Our weighting (§4) | **④ Lakehouse cloud 87** > ② Datamart cloud 72 > ① 57 > ③ 50 |
+| Speed first | **② Datamart cloud 83** > ④ Lakehouse cloud 82 > ① 61 > ③ 39 |
 
 So **if speed were the only goal, the cloud datamart would win, but only by 1 point**. But the brief's goal is to *centralize* all seven sources for three use cases, not only to deliver one report quickly. Also, cloud always beats on-premise in both weightings.
 
@@ -123,7 +124,7 @@ The brief proposes four platforms: **Snowflake, Google BigQuery, Azure Synapse/F
 - **ERP.** The brief allows two ERPs. We assume **Dynamics 365 Business Central**, since Microsoft documents a direct connection between Business Central and Fabric [4], and the bc2adls extension exports Business Central tables to Fabric [5]. **If the company uses SAP Business One instead**, that advantage disappears and Snowflake comes first (Snowflake 79, BigQuery 77, Fabric 76). The three are then very close; Part 3 costs the Microsoft stack only, so with SAP Business One the company should ask the three vendors for quotes before deciding.
 - **ETL tools.** dbt works well on BigQuery, Snowflake and Databricks. On Fabric, the dbt adapter works with the Fabric *Warehouse* [13]. That is fine for us: Fabric Warehouse tables are stored in the open Delta/Parquet format in OneLake, like the lakehouse [18].
 - **Lakehouse.** Databricks invented the lakehouse model (the brief even writes "Databricks (lakehouse)"). Fabric stores everything in open Delta tables in OneLake. BigQuery and Snowflake are data warehouses first.
-- **Cost.** BigQuery charges per query, which is almost free at our size (about $36/month for 1 TB stored and 3 TiB queried [6]). Fabric's smallest capacity, F2, costs about $191/month with a 1-year reservation in West Europe [1][2]. Snowflake costs about $290–340/month for a small warehouse running 4 hours a day [7]. Databricks has more complex pricing [8]. These amounts are small compared with the cost of one employee.
+- **Cost.** BigQuery charges per query, which is almost free at our size (about $36/month even for 1 TB stored and 3 TiB queried [6], far more than our ~130 GB). Fabric's smallest capacity, F2, costs about $191/month with a 1-year reservation in West Europe [1][2]. Snowflake costs about $290–340/month for a small warehouse running 4 hours a day [7]. Databricks has more complex pricing [8]. These amounts are small compared with the cost of one employee.
 - **Ease.** Snowflake is the simplest for SQL users. Databricks is built around notebooks and Spark, which our team doesn't know.
 
 **Choice: Microsoft Fabric**, in an EU region.
@@ -147,7 +148,7 @@ The brief proposes four platforms: **Snowflake, Google BigQuery, Azure Synapse/F
 | | Power BI | Tableau | Looker |
 |---|---|---|---|
 | Price | Pro: $14/user/month [3] | Viewer $15, Explorer $42, Creator $75 per user/month [11] | Price on quote, estimated at $60,000+/year [12] |
-| Cost for our ~70 users | ≈ $11,800/year | ≈ $16,600/year | ≈ $60,000+/year |
+| Cost for our ~25 users (5 creators, 20 readers) | 25 × $14 × 12 ≈ $4,200/year | 5 × $75 + 20 × $15 per month ≈ $8,100/year | ≈ $60,000+/year |
 
 **Choice: Power BI.** It is the cheapest per user and familiar to people who use Excel, which helps with the change management the brief asks for. We chose it **before** the platform, based on price and users. Its good fit with Fabric is then a point in Fabric's favour, not the reason we chose Power BI.
 
@@ -232,7 +233,7 @@ Only the IT team can read the raw layer. Business users only see the business ta
 ## 11. Limits of our analysis
 
 - **Scores are our own judgement.** We explain each one and cite our sources for the facts (prices, compatibilities), but another group could give different scores. §5 shows that cloud beats on-premise in both weightings we tested, while datamart vs lakehouse depends on how much weight we give speed.
-- **The company's size is assumed** (§2). With much more data or many more report readers, the costs and maybe the platform choice would change.
+- **The company's size comes from public figures, but the volumes are our estimates** (§2 and Part 0, §4). The number of report readers (25) is also our assumption. With much more data or many more readers, the costs and maybe the platform choice would change.
 - **The ERP is assumed to be Business Central.** With SAP Business One, Snowflake, BigQuery and Fabric are almost equal (§7).
 - **Prices are public list prices** checked on 26 September 2026. Some come from secondary sources because the vendor's page could not be read. Part 3 (costing) uses the same prices and lists every source with its date.
 

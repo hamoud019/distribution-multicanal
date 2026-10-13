@@ -75,9 +75,9 @@ Rules for the synthetic data:
 - **Fake identities only.** No real names or emails: every person is generated.
 - The generator will be written in the proof of concept (issue #8).
 
-## 5. What this changes in Parts 1 to 4
+## 5. What this changed in Parts 1 to 4
 
-Parts 1–4 were written for an imaginary retailer of **~30 stores, 60 M€ revenue and 70 report users**. Le Slip Français is smaller and more digital:
+The first version of Parts 1–4 was written for an imaginary retailer of **~30 stores, 60 M€ revenue and 70 report users**. We then resized them for Le Slip Français, which is smaller and more digital:
 
 | Assumption | Before | Le Slip Français |
 |---|---|---|
@@ -85,10 +85,15 @@ Parts 1–4 were written for an imaginary retailer of **~30 stores, 60 M€ reve
 | Stores | ~30 | 2 (+ ~100 Carrefour hypermarkets as wholesale) |
 | Online share | small | 72–88 % |
 | Employees | not stated | 69 |
-| Power BI users | 70 (10 creators) | to be resized: at most about 25 (a third of the staff) |
+| Power BI users | 70 (10 creators) | 25 (5 creators), about a third of the staff (assumption) |
+| Data preparation for reports today | 1.2 full-time analysts | 0.6 (assumption: small teams) |
 | Inventory at stake (6.5 % of sales) | 3.9 M€/year | ≈ 1.4 M€/year |
 
-These changes affect the costing (fewer licences and smaller volumes, but also a smaller inventory benefit), and they may affect the architecture choice. **Parts 1–4 should be updated with these figures** before we continue.
+What changed in the results:
+
+- **The choice stays the same:** a cloud lakehouse on Microsoft Fabric. It is still the cheapest option over 3 years (235 k€ against 243 k€ for the cloud datamart, [Part 3](03-costing.md)), and it keeps 87/100 in [Part 1](01-architecture-options.md).
+- **The business case is weaker:** the project now pays back only if it recovers about **7.2 %** of inventory losses (2.3 % before). So the inventory risk (R12) is now one of the top risks in [Part 2](02-swot-risks.md), and [Part 4](04-transformation-plan.md) measures it from phase 1.
+- **The platform is smaller:** one F2 Fabric capacity is enough for 3 years, and the CRM email events become the biggest data volume and the biggest Fivetran cost.
 
 ## Sources
 

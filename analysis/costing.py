@@ -122,21 +122,35 @@ def break_even_inventory_gain(extra_cost, yearly_distortion, live_years):
     return max(extra_cost, 0) / (yearly_distortion * live_years)
 
 
+def inventory_distortion(params):
+    """Yearly cost of stock-outs and overstock: revenue x distortion share."""
+    return params["revenue_eur"] * params["inventory_distortion_pct"] / 100
+
+
+def break_even_by_option(lines, params):
+    """{option: share of inventory distortion to recover} to pay back the extra cost vs today."""
+    rate = params["usd_per_eur"]
+    current = totals(lines, "current", rate).three_years
+    return {
+        o: break_even_inventory_gain(totals(lines, o, rate).three_years - current, inventory_distortion(params),
+                                     INVENTORY_LIVE_YEARS[o])
+        for o in OPTIONS
+    }
+
+
 def report():
     lines = load_lines(HERE / "cost_lines.csv")
     params = load_parameters(HERE / "cost_parameters.csv")
     rate = params["usd_per_eur"]
-    distortion = params["revenue_eur"] * params["inventory_distortion_pct"] / 100
     current = totals(lines, "current", rate).three_years
     results = {o: totals(lines, o, rate) for o in OPTIONS}
+    gains = break_even_by_option(lines, params)
 
     print(f"Current situation, 3 years: {current:,.0f} EUR\n")
     print(f"{'option':18} {'invest':>9} {'run':>9} {'TCO':>9} {'+manual':>9} {'vs now':>9} {'inv. gain':>9}")
     for o, t in results.items():
-        extra = t.three_years - current
-        gain = break_even_inventory_gain(extra, distortion, INVENTORY_LIVE_YEARS[o])
         print(f"{o:18} {t.part('investment'):9,.0f} {t.part('run'):9,.0f} {t.tco:9,.0f} "
-              f"{t.part('manual'):9,.0f} {extra:+9,.0f} {gain:9.1%}")
+              f"{t.part('manual'):9,.0f} {t.three_years - current:+9,.0f} {gains[o]:9.1%}")
 
     print("\nYear by year incl. manual work (EUR):")
     for o in ("current",) + OPTIONS:

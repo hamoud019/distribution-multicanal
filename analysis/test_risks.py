@@ -42,7 +42,7 @@ class PublishedRegister(unittest.TestCase):
     def test_top_five(self):
         self.assertEqual(
             [(r.id, r.score) for r in ranked(self.register)[:5]],
-            [("R01", 20), ("R02", 16), ("R03", 16), ("R05", 15), ("R12", 12)],
+            [("R01", 20), ("R02", 16), ("R03", 16), ("R12", 16), ("R05", 15)],
         )
 
     def test_covers_every_required_category(self):
