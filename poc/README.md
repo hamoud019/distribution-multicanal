@@ -129,6 +129,30 @@ On the generated data, about 9 rows in 10 are overstock: the generator draws sto
 
 Every source declares its refresh schedule and freshness thresholds in `dbt/models/staging/_sources.yml`, set from Part 4 §5: sources refreshed every 15 minutes warn after 1 hour, hourly sources after 3 hours, daily sources after 26 hours.
 
+## Dashboard
+
+The demo of the Sales Performance use case (issue #10): a small web page on the sales mart, made with [Streamlit](https://streamlit.io) because the PoC has no Power BI licence. After a first run of `run.py`:
+
+```
+py -3.12 poc/run.py --dashboard     # Windows
+python3 poc/run.py --dashboard      # macOS / Linux
+```
+
+It opens `http://localhost:8501` in the browser. Stop it with Ctrl+C. It reads the warehouse of the last run, so after a new run just reload the page.
+
+![The Sales Performance dashboard](dashboard/screenshot.png)
+
+What it shows, with the words of the glossary:
+
+- **Filters**: year, months, channel, location (store) and category. An empty list means everything.
+- **Six figures**: net revenue, margin, margin %, units, orders and average basket, each with its change against the **same months of last year**, with the same filters.
+- **Net revenue by month**, this year and last year on the same chart.
+- **Breakdown** by channel, by location (store), by category and for the top 15 products: net revenue this year and last year, change, margin, margin %, units, orders and average basket.
+
+For store managers: click-and-collect web orders count for the store that hands them over (they stay in the Web channel), so filtering on a store shows its till sales and the web orders collected there.
+
+**It reads only the gold marts.** Every query is in `dashboard/sales.py` and goes through one function, `read()`, which checks the query with DuckDB's own SQL parser and refuses any table outside the `marts` schema (and any file read directly). The page itself (`dashboard/app.py`) runs no SQL. The warehouse is opened **read-only**, and only while the page is drawn.
+
 ## Tests
 
 After a first run of `run.py`, with the PoC environment:
@@ -145,6 +169,7 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 - `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 19 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
   For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
 - `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; on every row, stock, demand, cover, sell-through and the three flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.
+- `test_dashboard.py`: the dashboard refuses raw, staging and intermediate tables and files, every query it sends reads only `marts` tables, the page runs no SQL of its own, and the warehouse is read-only. On a small generated warehouse, its figures match the mart: the totals and last year match `fct_sales_monthly`; a store, a category and some months match `fct_sales` this year and last year (net revenue, orders, average basket); a store sees the click-and-collect orders it hands over; channels and locations add up to the total; and the page opens without error, also with a store filter.
 
 The same seed gives the same data with the same Python version; Python only promises the same random numbers within a version.
 

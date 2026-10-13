@@ -24,7 +24,7 @@ A local version of the chosen platform on synthetic data: the 7 sources, a raw l
 py -3.12 poc/run.py
 ```
 
-See [poc/README.md](poc/README.md).
+Then `py -3.12 poc/run.py --dashboard` opens the Sales Performance dashboard. See [poc/README.md](poc/README.md).
 
 ## Governance rules
 
