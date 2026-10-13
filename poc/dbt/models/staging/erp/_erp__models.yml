@@ -6,3 +6,40 @@ models:
     columns:
       - name: location_code
         data_tests: [unique, not_null]
+
+  - name: stg_erp__items
+    description: One row per SKU, from Business Central. Prices and costs exclude VAT.
+    columns:
+      - name: sku
+        data_tests: [unique, not_null]
+      - name: product_code
+        description: The model the SKU belongs to (all sizes), from the SKU code.
+      - name: unit_cost
+        description: Production cost of one unit, excluding VAT.
+        data_tests: [not_null]
+
+  - name: stg_erp__sales_lines
+    description: Wholesale order lines from Business Central. Amounts exclude VAT.
+    columns:
+      - name: order_id
+        data_tests: [not_null]
+      - name: sku
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__items')
+                field: sku
+
+  - name: stg_erp__gl_entries
+    description: Monthly revenue per channel in the general ledger, as finance closes it. The reference for reconciliation.
+    columns:
+      - name: entry_no
+        data_tests: [unique, not_null]
+      - name: channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Web", "Store", "Wholesale"]
+      - name: revenue
+        description: Net revenue booked on the account, excluding VAT, positive for a sale.

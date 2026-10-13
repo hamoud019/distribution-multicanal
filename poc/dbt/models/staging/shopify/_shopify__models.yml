@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_shopify__orders
+    description: One row per Shopify order. Amounts include VAT, as Shopify sends them.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: order_date
+        description: Local Paris date of the order.
+        data_tests: [not_null]
+      - name: is_cancelled
+        description: Cancelled orders are not orders in the glossary, so they are left out of the sales.
+      - name: is_click_and_collect
+        description: True when the customer collects the order in a store ("Retrait en magasin").
+      - name: fulfillment_location_code
+        description: The location that ships the order (the warehouse) or hands it over (a store, for click-and-collect).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_erp__locations')
+                field: location_code
+
+  - name: stg_shopify__order_lines
+    description: One row per Shopify line item. Prices include VAT; the discount is for the whole line.
+    columns:
+      - name: order_line_id
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_shopify__orders')
+                field: order_id
+      - name: line_number
+        description: Position of the line in its order, from 1.
+      - name: sku
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_erp__items')
+                field: sku
+
+  - name: stg_shopify__refund_lines
+    description: One row per refunded order line. A refund is the return of the items, dated when it is refunded.
+    columns:
+      - name: order_line_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_shopify__order_lines')
+                field: order_line_id
+      - name: refund_date
+        description: Local Paris date of the refund.
+        data_tests: [not_null]
+      - name: subtotal_incl_vat
+        description: Amount refunded for the line, including VAT, after its discount.

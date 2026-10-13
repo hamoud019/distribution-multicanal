@@ -73,13 +73,38 @@ Smaller data-quality settings (how many emails are typed with capitals, how many
 | Layer | Where | What |
 |---|---|---|
 | Raw | `raw_<source>` schemas | the files exactly as received (CSV columns as text, JSON records whole), plus `_source`, `_file`, `_batch_id`, `_loaded_at`. `raw_meta.load_log` remembers every file and its content hash, so each file is loaded once. |
-| Staging | `staging` schema, `dbt/models/staging` | one model per source table: English names, real types, French formats parsed. The e-receipt email stays in the raw layer. |
-| Intermediate | `intermediate` schema | building blocks, here one row per till ticket. |
+| Staging | `staging` schema, `dbt/models/staging` | one model per source table: English names, real types, French formats parsed, Shopify JSON unnested. Emails and addresses stay in the raw layer. |
+| Intermediate | `intermediate` schema | building blocks: one row per till ticket; every order line of the three channels in one shape. |
 | Marts | `marts` schema | the report tables. |
 
-The first report table is **`marts.fct_pos_daily_sales`**: the net revenue (after discounts and returns, excluding VAT, as the glossary defines it), tickets and units of each store per day.
+### Store sales checked against the tills
+
+**`marts.fct_pos_daily_sales`**: the net revenue (after discounts and returns, excluding VAT, as the glossary defines it), tickets and units of each store per day.
 
 Its business test, `dbt/tests/assert_pos_daily_sales_match_z_reports.sql`, checks every store day against the till's end-of-day **Z report**: the same amount paid, to the cent, and the same number of tickets, as a store manager would. The end-to-end test shows that a Z report just one cent off makes `dbt build` fail.
+
+### The Sales Performance mart
+
+The first use case of the study (issue #9), in `dbt/models/marts/sales`:
+
+| Table | Grain | What |
+|---|---|---|
+| `fct_sales` | one order line | every Web, Store and Wholesale line, with quantity, gross revenue, discount, net revenue and margin, all excluding VAT; plus one row per returned line |
+| `dim_date` | one day | year, quarter, month, ISO week, weekday, and the same day last year, for period-over-period and year-over-year comparisons |
+| `dim_product` | one SKU | product, category, size, colour, unit price and unit cost from Business Central |
+| `dim_location` | one location | the warehouse/factory and the two stores |
+| `fct_sales_monthly` | month × channel × location | orders, units, net revenue, margin, average basket, and the net revenue of the previous month and of the same month last year |
+| `fct_sales_reconciliation` | month × channel | the mart's net revenue against the revenue finance booked in the ERP general ledger, with the gap |
+
+The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr.md):
+
+- **Net revenue** excludes VAT and shipping fees and comes after discounts and returns. Each line is converted from the VAT-inclusive Shopify and till prices and rounded to the cent. Cancelled web orders are not orders, so they are left out.
+- **Returns** are rows of their own, with negative quantity and amounts, dated **on the day of the refund**. A return lowers the net revenue of the month it happens in, not the month of the sale.
+- **Click-and-collect** orders stay in the Web channel (finance books them there), but their **location is the store** that hands them over. A store manager filtering on their store sees their till sales and the web orders collected there (story 4).
+- **Margin** is net revenue minus quantity × the unit cost of the ERP.
+- **Customer key** is a **placeholder** until the golden customer (issue #11): a hash of the Shopify account id. Store tickets stay anonymous and wholesale accounts are companies, so they have none.
+
+**Reconciliation with finance (story 5).** `dbt/tests/assert_sales_reconcile_with_erp_finance.sql` compares the mart with the general ledger for every month and channel. The gap must stay within **0.5 %** of the ERP figure: the tolerance of [Part 4](../docs/deliverables/04-transformation-plan.md) (§4), set as `reconciliation_tolerance` in `dbt/dbt_project.yml`. On the generated data the largest gap is about 20 cents in a month (cent rounding per line). The end-to-end test shows that a month booked 0.6 % higher in the ledger makes `dbt build` fail.
 
 Every source declares its refresh schedule and freshness thresholds in `dbt/models/staging/_sources.yml`, set from Part 4 §5: sources refreshed every 15 minutes warn after 1 hour, hourly sources after 3 hours, daily sources after 26 hours.
 
@@ -97,6 +122,7 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 - `test_generate.py`: same seed gives the same files, volumes match Part 0, the data looks like the company, and each source has its quirks.
 - `test_ingest.py`: every record is loaded unchanged with its metadata, a second run loads only new files, a changed file replaces its old rows, and paths with an apostrophe work.
 - `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 19 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
+  For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
 
 The same seed gives the same data with the same Python version; Python only promises the same random numbers within a version.
 

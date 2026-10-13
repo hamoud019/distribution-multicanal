@@ -27,3 +27,138 @@ models:
         description: What customers paid, including VAT, after discounts and returns (the till's total).
       - name: net_revenue
         description: "Net revenue (glossary): after discounts and returns, excluding VAT."
+
+  - name: fct_sales
+    description: >
+      The sales fact (Sales Performance use case): one row per order line of the Web, Store and Wholesale
+      channels, and one row per returned line on the day of the return. Amounts exclude VAT (glossary).
+      Checked every run against the ERP general ledger (test assert_sales_reconcile_with_erp_finance).
+    data_tests:
+      - unique:
+          column_name: "order_id || '|' || order_line || '|' || is_return"
+    columns:
+      - name: order_date
+        description: "Date (glossary): day of the sale, or of the return for a returned line. Paris time."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: channel
+        description: "Channel (glossary): where the sale happened. Click-and-collect stays a Web sale."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Web", "Store", "Wholesale"]
+      - name: location
+        description: >
+          Location (glossary) that fulfils the line: the warehouse for shipped web orders and wholesale,
+          the store for till sales and for click-and-collect orders, so the store gets credit for them.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location
+      - name: order_id
+        description: "Order (glossary): Shopify order id, till ticket number or Business Central document number."
+        data_tests: [not_null]
+      - name: order_line
+        description: "Order line (glossary): position of the line in its order, from 1."
+        data_tests: [not_null]
+      - name: wholesale_account
+        description: "Wholesale account (glossary): the Business Central customer number, for Wholesale only."
+      - name: sku
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: sku
+      - name: customer_key
+        description: >
+          Customer key (glossary). Placeholder until the golden customer (issue #11): a pseudonymous key per
+          Shopify account. Empty for store tickets (anonymous) and wholesale (companies, not people).
+        meta: {placeholder_until: "#11"}
+      - name: quantity
+        description: Units sold; negative for a return.
+      - name: gross_revenue
+        description: "Gross revenue (glossary): quantity x unit price, excluding VAT, before discounts."
+      - name: discount
+        description: "Discount (glossary), excluding VAT."
+      - name: net_revenue
+        description: "Net revenue (glossary): after discounts and returns, excluding VAT and shipping fees."
+        data_tests: [not_null]
+      - name: margin
+        description: "Margin (glossary): net revenue - quantity x unit cost."
+        data_tests: [not_null]
+      - name: is_return
+        description: "Return (glossary): a returned line, counted on the day of the return with negative amounts."
+      - name: is_click_and_collect
+        description: "Click and collect (glossary): a web order collected in a store."
+
+  - name: dim_product
+    description: Product dimension, one row per SKU.
+    columns:
+      - name: sku
+        data_tests: [unique, not_null]
+      - name: product
+        description: "Product (glossary): the model, in one colour."
+      - name: product_code
+        description: The model code shared by all sizes of a product.
+      - name: unit_price
+        description: Shelf price excluding VAT.
+      - name: unit_cost
+        description: "Unit cost (glossary): production cost of one unit, excluding VAT."
+
+  - name: dim_location
+    description: Location dimension (store and channel). The warehouse/factory and the own stores.
+    columns:
+      - name: location
+        data_tests: [unique, not_null]
+
+  - name: dim_date
+    description: >
+      Date dimension: every day of the years with sales. `same_date_last_year` and `same_weekday_last_year`
+      (364 days before, same weekday) support year-over-year comparisons; `week_start` and `month_start`
+      group the days for period-over-period comparisons.
+    columns:
+      - name: date
+        data_tests: [unique, not_null]
+
+  - name: fct_sales_monthly
+    description: >
+      Monthly sales per channel and location, with the previous month and the same month a year before,
+      for period-over-period and year-over-year comparisons. Every month is present, with zeros when
+      nothing was sold.
+    data_tests:
+      - unique:
+          column_name: "month_start || '|' || channel || '|' || location"
+    columns:
+      - name: orders
+        description: Orders placed in the month (lines that are returns do not count).
+      - name: units
+        description: Units sold minus units returned in the month.
+      - name: average_basket
+        description: "Average basket (glossary): net revenue / orders. Empty when there is no order."
+      - name: net_revenue_previous_month
+        description: Net revenue of the previous month, same channel and location. Empty for the first month.
+      - name: net_revenue_last_year
+        description: Net revenue of the same month a year before, same channel and location. Empty in the first year.
+
+  - name: fct_sales_reconciliation
+    description: >
+      Reconciliation log (Part 4, section 4): net revenue of the sales mart against the revenue booked in the
+      ERP general ledger, per month and channel, with the gap and whether it is within the tolerance.
+    data_tests:
+      - unique:
+          column_name: "month_start || '|' || channel"
+    columns:
+      - name: erp_revenue
+        description: Revenue in the general ledger, excluding VAT (the sign of the accounting credit turned around).
+      - name: gap_share
+        description: The gap as a share of the ERP revenue. Empty when the ERP revenue is zero.
+      - name: tolerance
+        description: The largest accepted gap share (var reconciliation_tolerance).

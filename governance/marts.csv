@@ -13,6 +13,7 @@ sales,fct_sales,discount,Discount
 sales,fct_sales,net_revenue,Net revenue
 sales,fct_sales,margin,Margin
 sales,fct_sales,is_return,Return
+sales,fct_sales,is_click_and_collect,Click and collect
 sales,dim_product,sku,SKU
 sales,dim_product,product,Product
 sales,dim_product,category,Category

@@ -17,6 +17,7 @@ Net revenue,"Gross revenue minus discounts and returns, excluding VAT and shippi
 Unit cost,"Production cost of one unit of a SKU from the ERP (materials + factory labour), excluding VAT",CFO
 Margin,Net revenue minus quantity x unit cost,CFO
 Return,An order line sent back by the customer; counted on the date the return is received,E-commerce director
+Click and collect,"A Web order the customer collects in a store: it stays in the Web channel, and its location is that store, which gets credit for it",E-commerce director
 Average basket,Net revenue divided by number of orders over a period (63 EUR excl. VAT on the web in 2025),Sales director
 Customer,"A person who has placed at least one Web or Store order, as known in one source tool",Marketing director
 Golden customer,"The single record for one real person after matching all source records (Shopify, Klaviyo, POS, Zendesk)",Marketing director

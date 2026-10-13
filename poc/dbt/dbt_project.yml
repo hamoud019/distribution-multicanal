@@ -13,6 +13,9 @@ flags:
 
 vars:
   vat_rate: 0.20  # French standard VAT: net revenue excludes it (glossary, Part 6)
+  # Largest accepted gap between the sales mart and the ERP general ledger, per month and channel,
+  # as a share of the ERP figure (Part 4, section 4: our choice, to be agreed with the CFO)
+  reconciliation_tolerance: 0.005
 
 models:
   lsf_poc:
