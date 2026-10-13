@@ -4,9 +4,10 @@
     python3 poc/run.py                  # macOS / Linux
     py -3.12 poc/run.py --incremental   # keep the warehouse and load only new files
     py -3.12 poc/run.py --docs          # open the dbt docs and lineage graph in the browser
+    py -3.12 poc/run.py --dashboard     # open the Sales Performance dashboard in the browser
 
 The first run creates a virtual environment in poc/.venv and installs poc/requirements.txt
-(dbt-core, dbt-duckdb, duckdb). No cloud account is needed: DuckDB stands in for the
+(dbt-core, dbt-duckdb, duckdb, streamlit). No cloud account is needed: DuckDB stands in for the
 cloud warehouse (Fabric in the study) in a single local file, poc/data/warehouse.duckdb.
 """
 
@@ -73,6 +74,8 @@ def main():
     parser.add_argument("--seed", default=2026, type=int)
     parser.add_argument("--scale", default=1.0, type=float, help="fraction of the 1 %% sample, for a quick run")
     parser.add_argument("--docs", action="store_true", help="serve the dbt docs of the last run, then stop")
+    parser.add_argument("--dashboard", action="store_true",
+                        help="open the Sales Performance dashboard on the last run's warehouse, then stop")
     args = parser.parse_args()
 
     ensure_environment()
@@ -81,6 +84,13 @@ def main():
     if args.docs:
         run_dbt("docs", "serve")
         return
+    if args.dashboard:
+        if not warehouse.exists():
+            sys.exit("The warehouse is not built yet. Run py -3.12 poc/run.py first.")
+        print("== Opening the dashboard in the browser (Ctrl+C to stop it)")
+        sys.exit(subprocess.call([sys.executable, "-m", "streamlit", "run", str(POC / "dashboard" / "app.py"),
+                                  "--server.showEmailPrompt", "false", "--browser.gatherUsageStats", "false",
+                                  "--client.toolbarMode", "viewer"]))
 
     sys.path.insert(0, str(POC))
     from generate import generate
@@ -101,6 +111,7 @@ def main():
 
     print(f"\nDone. The warehouse is {warehouse.relative_to(POC.parent)}.")
     print("To see the lineage graph: py -3.12 poc/run.py --docs")
+    print("To open the sales dashboard: py -3.12 poc/run.py --dashboard")
 
 
 if __name__ == "__main__":
