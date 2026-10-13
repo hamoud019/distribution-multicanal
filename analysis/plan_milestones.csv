@@ -1,0 +1,32 @@
+id,phase,date,key,gantt_label,description,mitigation_id,on_gantt
+M0.1,0,2027-01-04,kickoff,Kick-off,"Kick-off: ERP confirmed as Business Central (if it is SAP Business One, quotes are asked before the platform is bought)",M-TRF-11,no
+M0.2,0,2027-01-15,budget,Budget and scope,Fixed scope per phase and a 15 % contingency approved by the CFO,M-TRF-4,no
+M0.3,0,2027-01-29,platform_ready,Platform ready,"Fabric Warehouse in West Europe with its supported dbt adapter, no preview features in production",M-TRF-7,no
+M0.4,0,2027-02-26,rules_approved,Rules approved,Glossary signed by its owners; raw layer open to the data engineer only; retention periods and erasure procedure approved by the DPO,M-TRF-9,no
+M0.5,0,2027-03-15,engineer_in_post,Engineer in post,Internal data engineer in post (hired or trained) and paired with the consultant for the whole build,M-TRF-3,yes
+M0.6,0,2027-03-19,contracts,Contracts signed,1-year Fabric reservation and annual Fivetran contract signed; Airbyte kept as back-up,M-TRF-6,no
+G0,0,2027-04-02,gate_0,Gate 0,Go/no-go for phase 1,,yes
+M1.1,1,2027-04-16,snapshots_start,Stock snapshots start,"Business Central link to Fabric live; the daily stock snapshot starts, because the ERP keeps only today's stock",,yes
+M1.2,1,2027-05-14,sales_sources,POS and Shopify live,"Shopify and POS loaded by Fivetran every 15 minutes; POS in small batches with retries, freshness tests per store and a daily reconciliation with ERP sales totals",M-TRF-8,no
+M1.3,1,2027-06-11,history_loaded,History reconciled,"3 years of history (2024 to 2026) loaded once, reconciled with ERP finance, then frozen",,yes
+M1.4,1,2027-06-25,matching_rules,Matching rules,Customer matching rules approved and data stewards named; match rate measured by a dbt test and reported every month,M-TRF-2,no
+M1.5,1,2027-07-01,baseline_start,Baseline starts,Inventory baseline starts: stock-outs and overstock counted every month from the snapshots,M-TRF-12,no
+M1.6,1,2027-07-30,sales_live,Sales reports live,"Sales reports live, with the last refresh time on every page; parallel run with the old reports starts",M-TRF-9,yes
+M1.7,1,2027-10-29,sales_retired,Old sales reports retired,Old sales reports retired after two reconciled month-end closes (August and September),,yes
+M1.8,1,2027-11-30,backup_trained,Back-up trained,A second person trained as back-up for the data engineer,M-TRF-3,no
+M1.9,1,2027-12-17,baseline_done,Baseline done,Six-month inventory baseline (July to December) presented to the steering committee,M-TRF-12,no
+G1,1,2027-12-17,gate_1,Gate 1,Go/no-go for phase 2,,yes
+M2.1,2,2028-01-10,capacity_f4,F4 capacity,Fabric capacity raised from F2 to F4; inventory build starts on 9 months of snapshots,,no
+M2.2,2,2028-04-28,inventory_live,Inventory reports live,"Stock cover, sell-through, stock-out and overstock lists live; parallel run with the supply chain spreadsheets",,yes
+M2.3,2,2028-05-31,baseline_followup,Monthly follow-up,First monthly comparison of stock-outs and overstock with the baseline,M-TRF-12,no
+G2,2,2028-06-30,gate_2,Gate 2,Go/no-go for phase 3; inventory result reviewed against the baseline,M-TRF-12,yes
+M3.1,3,2028-09-04,dpia_start,DPIA starts,DPIA for customer segmentation started by the DPO,M-TRF-5,no
+M3.2,3,2028-12-15,dpia_approved,DPIA approved,DPIA approved: customer data can be loaded for segmentation,M-TRF-5,yes
+M3.3,3,2029-01-15,crm_loaded,Customer sources live,"Klaviyo and Zendesk loaded every hour, web analytics and social media every day; consent flag carried from the source",M-TRF-5,no
+M3.4,3,2029-02-26,match_gate,Match-rate gate,"Match-rate gate: at least 90 % of Klaviyo profiles with an order matched, and fewer than 200 pairs waiting for review",M-TRF-2,yes
+M3.5,3,2029-04-30,segments_live,Segments live,Customer and Marketing reports live; segments exclude people without consent,,yes
+M3.6,3,2029-05-31,erasure_test,Erasure tested,"Erasure procedure tested end to end, from the source tools to Power BI",M-TRF-5,no
+G3,3,2029-06-29,gate_3,"Gate 3 and consultant leaves",Go/no-go for phase 4; inventory result reviewed against the baseline; the consultant leaves after handing over,M-TRF-12,yes
+M4.1,4,2029-10-26,last_reports,Last reports retired,"Last channel reports (support, web and social dashboards) retired",,yes
+M4.2,4,2029-11-23,handover,Hand-over,Run book complete; the steering committee becomes the data governance committee,,yes
+G4,4,2029-12-21,gate_4,Project closed,Project closed after the run team has worked one whole phase without the consultant; inventory result reviewed against the baseline,M-TRF-12,yes

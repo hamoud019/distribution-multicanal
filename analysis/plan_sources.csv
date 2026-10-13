@@ -1,0 +1,8 @@
+source,tool,method,frequency,phase,live_from,history_months,retention_dataset,note
+ERP,Business Central,Business Central link to Fabric,every night,1,2027-04-16,36,erp.items_stock_production,"Wholesale orders, items, stock, production and finance; plus a daily stock snapshot"
+CRM,Klaviyo,Fivetran,every hour,3,2029-01-15,36,klaviyo.profiles,Only profiles and events still inside the 3-year retention period
+POS,Store tills,Fivetran,every 15 minutes,1,2027-05-14,36,pos.tickets,"Small batches with retries; the stores closed in 2024-2025 are kept as closed locations"
+E-commerce,Shopify Plus,Fivetran,every 15 minutes,1,2027-05-14,36,shopify.customers,Shopify Plus since October 2023: the 3 years of history are all in Shopify
+Web analytics,Google Analytics 4 + Meta Pixel,Fivetran,every day,3,2029-01-15,25,ga4.daily_traffic,Daily totals only; at most 25 months (retention rule)
+Social media,"Instagram, Facebook, TikTok",Fivetran,every day,3,2029-01-15,0,social.account_insights,Daily totals only; no history required
+Customer support,Zendesk,Fivetran,every hour,3,2029-01-15,36,zendesk.tickets,Ticket text stays in the raw layer
