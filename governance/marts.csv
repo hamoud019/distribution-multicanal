@@ -53,26 +53,39 @@ inventory,fct_stock_snapshot,is_slow_mover,Slow mover
 inventory,fct_production,production_date,Date
 inventory,fct_production,sku,SKU
 inventory,fct_production,units_produced,Units produced
+marketing,fct_campaign,campaign_id,Campaign
 marketing,fct_campaign,send_date,Date
 marketing,fct_campaign,campaign,Campaign
 marketing,fct_campaign,recipients,Recipients
 marketing,fct_campaign,open_rate,Open rate
 marketing,fct_campaign,click_rate,Click rate
+marketing,fct_campaign,attributed_orders,Attributed orders
 marketing,fct_campaign,attributed_revenue,Attributed revenue
 marketing,fct_web_daily,date,Date
 marketing,fct_web_daily,traffic_source,Traffic source
 marketing,fct_web_daily,sessions,Session
+marketing,fct_web_daily,conversions,Conversion
 marketing,fct_web_daily,conversion_rate,Conversion rate
 marketing,fct_web_daily,consent_rate,Consent rate
 marketing,fct_social_daily,date,Date
 marketing,fct_social_daily,platform,Social platform
+marketing,fct_social_daily,impressions,Impressions
 marketing,fct_social_daily,engagement,Engagement
 marketing,fct_social_daily,followers,Followers
 support,fct_ticket,created_date,Date
 support,fct_ticket,ticket_id,Ticket
 support,fct_ticket,customer_key,Customer key
+support,fct_ticket,order_id,Order
+support,fct_ticket,channel,Channel
+support,fct_ticket,sku,SKU
 support,fct_ticket,ticket_category,Ticket category
 support,fct_ticket,contact_channel,Contact channel
 support,fct_ticket,status,Ticket status
 support,fct_ticket,first_response_hours,First response time
 support,fct_ticket,csat,CSAT
+support,fct_support_monthly,month_start,Date
+support,fct_support_monthly,channel,Channel
+support,fct_support_monthly,product,Product
+support,fct_support_monthly,tickets,Ticket
+support,fct_support_monthly,csat_rate,CSAT rate
+support,fct_support_monthly,first_response_hours,First response time

@@ -97,7 +97,7 @@ class Pipeline(unittest.TestCase):
     def test_every_source_has_a_freshness_check_that_passes(self):
         self.assertEqual(self.dbt("source", "freshness").returncode, 0)
         sources = self.results("sources.json")
-        self.assertEqual(len(sources), 19)
+        self.assertEqual(len(sources), 20)
         self.assertEqual({r["status"] for r in sources}, {"pass"})
 
     def test_freshness_flags_each_source_against_its_own_schedule(self):

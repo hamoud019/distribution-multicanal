@@ -1,6 +1,29 @@
 version: 2
 
 models:
+  - name: stg_klaviyo__campaigns
+    description: One row per Klaviyo campaign, with the recipients and delivered counts of the campaign report.
+    columns:
+      - name: campaign_id
+        data_tests: [unique, not_null]
+
+  - name: stg_klaviyo__events
+    description: One row per open or click of a campaign email, in Paris time.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: metric
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Opened Email", "Clicked Email"]
+      - name: campaign_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_klaviyo__campaigns')
+                field: campaign_id
+
   - name: stg_klaviyo__profiles
     description: One row per Klaviyo profile, without contact data (only matching keys).
     columns:

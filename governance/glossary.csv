@@ -49,11 +49,14 @@ Campaign,"One marketing send in Klaviyo (email or SMS) to a list or segment, wit
 Recipients,Number of profiles a campaign was sent to,Marketing director
 Open rate,Unique opens divided by delivered messages of a campaign,Marketing director
 Click rate,Unique clicks divided by delivered messages of a campaign,Marketing director
-Attributed revenue,Net revenue of Web orders placed by recipients within 5 days of clicking a campaign,Marketing director
+Attributed revenue,"Net revenue of Web orders placed by recipients within 5 days of clicking a campaign; when a customer clicked several campaigns, the most recent click before the order wins",Marketing director
+Attributed orders,Number of Web orders whose attributed revenue goes to a campaign,Marketing director
 Session,"A visit to the website measured by Google Analytics 4, only for visitors who accepted analytics cookies",E-commerce director
 Traffic source,"Where a session comes from: organic search, paid search, social, email, direct, other",E-commerce director
-Conversion rate,Web orders divided by sessions over a period,E-commerce director
+Conversion,"A Web order that Google Analytics 4 measured at the end of a session, so only for visitors who accepted analytics cookies",E-commerce director
+Conversion rate,Conversions divided by sessions over a period,E-commerce director
 Social platform,"Instagram, Facebook or TikTok account of the brand",Marketing director
+Impressions,"Times the brand's posts or videos were shown in a day: Instagram and Facebook impressions, TikTok video views",Marketing director
 Engagement,"Likes + comments + shares + saves on the brand's posts, per platform and day",Marketing director
 Followers,Number of followers of a social account at the end of the day,Marketing director
 Ticket,A customer request in Zendesk (email or chat),Customer service manager
@@ -61,6 +64,7 @@ Contact channel,"How the customer reached customer service: email, web form or c
 Ticket status,"Where a ticket stands in Zendesk: open, solved or closed",Customer service manager
 Ticket category,"Reason of a ticket: delivery, size/exchange, product quality, payment, other",Customer service manager
 First response time,Hours between ticket creation and the first reply from an agent,Customer service manager
+CSAT rate,Satisfied tickets divided by the tickets where the customer answered the satisfaction survey,Customer service manager
 CSAT,Customer satisfaction score given after a ticket is solved (satisfied / not satisfied),Customer service manager
 Sales,"All Web, Store and Wholesale orders with their revenue and margin (the sales mart)",CFO
 Inventory,"Stock levels, stock movements and production of SKUs per location (the inventory mart)",Supply chain director

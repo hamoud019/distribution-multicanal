@@ -153,6 +153,18 @@ class FullSample(unittest.TestCase):
                             and p["attributes"]["subscriptions"]["email"]["marketing"]["consent"] == "UNSUBSCRIBED"
                             for p in self.profiles))
 
+    def test_web_analytics_has_refused_visitors_and_tickets_name_their_purchase(self):
+        traffic = csv_rows(self.out / "ga4" / "daily_traffic.csv")
+        self.assertEqual({r["analytics_storage"] for r in traffic}, {"Yes", "No"})
+        days = {r["date"] for r in csv_rows(self.out / "ga4" / "consent_daily.csv")}
+        self.assertEqual(len(days), len({r["date"] for r in traffic}))
+        orders = {o["name"] for o in self.orders if not o["cancelled_at"]}
+        tills = {r["ticket_no"] for _, r in self.tickets}
+        for t in jsonl(self.out / "zendesk" / "tickets.jsonl"):
+            fields = {f["id"]: f["value"] for f in t["custom_fields"]}
+            self.assertIn(fields[g.ORDER_FIELD], orders | tills)
+            self.assertLessEqual(t["metrics"]["reply_time_in_minutes"]["calendar"], 72 * 60)
+
     def test_each_tool_keeps_its_own_date_format(self):
         self.assertRegex(self.orders[0]["created_at"], r"\+0[12]:00$")
         self.assertRegex(csv_rows(self.out / "ga4" / "daily_traffic.csv")[0]["date"], r"^\d{8}$")

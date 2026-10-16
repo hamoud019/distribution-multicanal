@@ -3,8 +3,8 @@ version: 2
 models:
   - name: fct_ticket
     description: >
-      One row per Zendesk ticket, linked to the golden customer of the requester (story 14). The first
-      response time and the support quality figures come with the marketing and support mart (issue #13).
+      One row per Zendesk ticket, linked to the golden customer of the requester (story 14). Each ticket is
+      about one purchase: its order, sales channel and SKU come from the fields the agent filled in.
     columns:
       - name: ticket_id
         description: "Ticket (glossary): the Zendesk ticket number."
@@ -20,6 +20,24 @@ models:
               arguments:
                 to: ref('dim_customer')
                 field: customer_key
+      - name: order_id
+        description: "Order (glossary) the ticket is about."
+        data_tests: [not_null]
+      - name: channel
+        description: "Channel (glossary) of that order: Web or Store."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Web", "Store"]
+      - name: sku
+        description: "SKU (glossary) the ticket is about."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: sku
       - name: ticket_category
         description: "Ticket category (glossary)."
         data_tests:
@@ -30,5 +48,22 @@ models:
         description: "Contact channel (glossary): email, web or chat."
       - name: status
         description: "Ticket status (glossary): open, solved or closed."
+      - name: first_response_hours
+        description: "First response time (glossary), in hours."
       - name: csat
         description: "CSAT (glossary): satisfied or not satisfied; empty when the survey was not offered."
+
+  - name: fct_support_monthly
+    description: >
+      Support quality per month, sales channel and product: tickets, CSAT rate and first response time
+      (story 15).
+    data_tests:
+      - unique:
+          column_name: "month_start || '|' || channel || '|' || product"
+    columns:
+      - name: tickets
+        description: "Ticket (glossary): number of tickets."
+      - name: csat_rate
+        description: "CSAT rate (glossary): satisfied / tickets with a survey answer. Empty without an answer."
+      - name: first_response_hours
+        description: "First response time (glossary): average, in hours."

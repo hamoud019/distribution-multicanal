@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: fct_campaign
+    description: >
+      One row per Klaviyo campaign: recipients, open and click rates, and the Web orders and net revenue
+      attributed to it (a click, then an order by the same golden customer within 5 days; the most recent
+      click wins).
+    columns:
+      - name: campaign_id
+        description: "Campaign (glossary): the Klaviyo campaign id."
+        data_tests: [unique, not_null]
+      - name: campaign
+        description: "Campaign (glossary): the campaign name."
+      - name: send_date
+        description: "Date (glossary): day the campaign was sent, Paris time."
+        data_tests: [not_null]
+      - name: recipients
+        description: "Recipients (glossary)."
+      - name: open_rate
+        description: "Open rate (glossary): unique opens / delivered messages."
+      - name: click_rate
+        description: "Click rate (glossary): unique clicks / delivered messages."
+      - name: attributed_orders
+        description: "Attributed orders (glossary)."
+      - name: attributed_revenue
+        description: "Attributed revenue (glossary): net revenue of the attributed Web orders, excluding VAT."
+        data_tests: [not_null]
+
+  - name: fct_web_daily
+    description: >
+      The web funnel per day and traffic source, only for visitors who accepted analytics cookies, with the
+      day's consent rate.
+    data_tests:
+      - unique:
+          column_name: "date || '|' || traffic_source"
+    columns:
+      - name: date
+        data_tests: [not_null]
+      - name: traffic_source
+        description: "Traffic source (glossary)."
+      - name: sessions
+        description: "Session (glossary): visits of visitors who accepted analytics cookies."
+      - name: conversions
+        description: "Conversion (glossary): Web orders GA4 measured at the end of a session."
+      - name: conversion_rate
+        description: "Conversion rate (glossary): conversions / sessions."
+      - name: consent_rate
+        description: "Consent rate (glossary): visitors who accepted / visitors who saw the cookie banner that day."
+
+  - name: fct_social_daily
+    description: One row per day and social platform.
+    data_tests:
+      - unique:
+          column_name: "date || '|' || platform"
+    columns:
+      - name: platform
+        description: "Social platform (glossary)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Instagram", "Facebook", "TikTok"]
+      - name: impressions
+        description: "Impressions (glossary)."
+      - name: engagement
+        description: "Engagement (glossary)."
+      - name: followers
+        description: "Followers (glossary)."

@@ -8,7 +8,7 @@ The rules are kept as files in `governance/`, so the platform can read them (for
 
 | File | Content |
 |---|---|
-| `glossary.csv` | 68 business terms, with definitions and owners |
+| `glossary.csv` | 72 business terms, with definitions and owners |
 | `marts.csv` | every column of the planned report tables, linked to a glossary term |
 | `mdm_rules.csv` | customer matching and "which value wins" rules |
 | `pii_inventory.csv` | every personal-data field of the 7 sources and its treatment |
@@ -37,7 +37,7 @@ The glossary gives **one definition per term and one owner** who decides if it c
 | **Sell-through rate** | Units sold ÷ (stock at start + units received) over a period | Supply chain director |
 | **Stockout / Overstock** | Zero stock while the SKU sold in the last 28 days / stock cover above 180 days | Supply chain director |
 
-**Coverage check.** We planned the report tables of the proof of concept in `marts.csv`: 5 marts (Sales, Customer, Inventory, Marketing, Support) with 77 columns in 10 tables (sales, product, customer, marketing segments, stock, production, campaigns, web, social, support). **Every mart name and every column is linked to a glossary term**, and a test fails if someone adds one without a definition.
+**Coverage check.** We planned the report tables of the proof of concept in `marts.csv`: 5 marts (Sales, Customer, Inventory, Marketing, Support) with 90 columns in 11 tables (sales, product, customer, marketing segments, stock, production, campaigns, web, social, support tickets, monthly support quality). **Every mart name and every column is linked to a glossary term**, and a test fails if someone adds one without a definition.
 
 ## 2. Single customer view (MDM)
 

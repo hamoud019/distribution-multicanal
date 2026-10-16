@@ -38,8 +38,8 @@ Each source keeps the format of its tool, with the problems the platform must so
 | POS | store tills | `pos/<store>/tickets_<day>.csv`, `z_<day>.csv` | one small file per store and day; French formats (`;`, `29,00`, `dd/mm/yyyy`); returns as negative quantities | every 15 minutes |
 | ERP | Business Central | `erp/*.csv`, `erp/stock/stock_<monday>.csv` | column names like `No.` and `Posting Date`; stock as a full snapshot each week; revenue as negative accounting credits | every night |
 | CRM | Klaviyo | `klaviyo/*.jsonl` | other customer ids; some emails differ from Shopify; nested JSON | every hour |
-| Customer support | Zendesk | `zendesk/tickets.jsonl` | UTC times; free text | every hour |
-| Web analytics | Google Analytics 4 | `ga4/daily_traffic.csv` | dates as `YYYYMMDD`; daily totals only | every day |
+| Customer support | Zendesk | `zendesk/tickets.jsonl` | UTC times; free text; the order and product as custom fields with numeric ids | every hour |
+| Web analytics | Google Analytics 4, cookie banner | `ga4/daily_traffic.csv`, `ga4/consent_daily.csv` | dates as `YYYYMMDD`; daily totals only; some rows from visitors who refused cookies | every day |
 | Social media | Instagram, Facebook, TikTok | `social/*` | three platforms, three formats (JSON lines, one JSON document, CSV with US dates) | every day |
 
 The same person has a different id in each tool, their email is sometimes typed with capitals or spaces, and Klaviyo sometimes has the phone in French format (`06 12 34 56 78`). Some families share one phone, and some people unsubscribed in Klaviyo while Shopify still says "subscribed". The golden customer (below) fixes this.
@@ -68,6 +68,10 @@ Part 0 gives the volumes, the basket, the share of repeat buyers and the channel
 | Subscribers who later unsubscribed in Klaviyo only | 10 % |
 | People who share a phone with a family member (same last name and address) | 3 % |
 | Web conversion rate | 2 % (Part 0) |
+| Visitors who accept analytics cookies | 55 % to 75 % a day |
+| GA4 rows from visitors who refused (a tag firing before the banner) | 1 day and traffic source in 10 |
+| First reply to a support ticket | about 4 hours, at most 72 |
+| Facebook and TikTok followers at the start of 2023 | half and a fifth of Instagram's |
 
 Smaller data-quality settings (how many emails are typed with capitals, how many profiles have a phone number) are in the code next to where they are used.
 
@@ -172,7 +176,27 @@ The phone rule asks for the first name too: **a family sharing one phone is not 
 
 The 24 months come from the glossary; the recency days (30, 90, 180, 365) and the segment rules are our assumption. Both are `rfm_window_months` and `rfm_recency_days` in `dbt/dbt_project.yml`. The monetary score (net revenue of 24 months, five groups of the same size) is in `dim_customer` for the marketers but does not change the segment. Before segmentation goes live, Part 6 asks for a DPIA (§4).
 
-**On the generated data**, 11,482 records become 7,561 golden customers; 4,474 of them are in the sales or support. 42 % of the customers with an order bought more than once, as in Part 0, and 239 bought both online and in store. 1,359 customers are in the marketing segments. 96 % of the Klaviyo profiles of people who ordered online are matched to their Shopify customer, above the 90 % gate of Part 6. Every sales row has a key: 471 k€ of net revenue from golden customers, 23 k€ from anonymous store tickets and 121 k€ wholesale.
+**On the generated data**, 11,482 records become 7,561 golden customers; 4,470 of them are in the sales or support. 42 % of the customers with an order bought more than once, as in Part 0, and 239 bought both online and in store. 1,359 customers are in the marketing segments. 96 % of the Klaviyo profiles of people who ordered online are matched to their Shopify customer, above the 90 % gate of Part 6. Every sales row has a key: 471 k€ of net revenue from golden customers, 23 k€ from anonymous store tickets and 121 k€ wholesale.
+
+### The Marketing mart and support quality
+
+The marketing results (issue #13) are in `dbt/models/marts/marketing`; the support quality figures are in `dbt/models/marts/support`, next to `fct_ticket`.
+
+| Table | Grain | What |
+|---|---|---|
+| `fct_campaign` | one Klaviyo campaign | send date, recipients, open and click rates, and the Web orders and net revenue attributed to it (story 8) |
+| `fct_web_daily` | day × traffic source | sessions, conversions and conversion rate of the visitors who accepted cookies, with the day's consent rate (story 9) |
+| `fct_social_daily` | day × platform | impressions, engagement and followers of Instagram, Facebook and TikTok (story 10) |
+| `fct_support_monthly` | month × sales channel × product | tickets, CSAT rate and average first response time (story 15) |
+
+The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr.md):
+
+- **Attributed revenue**: the net revenue of the **Web orders a golden customer placed within 5 days after clicking a campaign**. The click and the order are matched through the golden customer, so a Klaviyo profile and a Shopify customer with different emails still count as one person. When a customer clicked several campaigns, the **most recent click before the order wins**, so no order counts twice. Opening without clicking does not count. The 5 days are `attribution_window_days` in `dbt/dbt_project.yml`.
+- **Sessions only with consent**: GA4 rows of visitors who refused cookies (`analytics_storage = No`, sent by a tag firing before the banner) are dropped in staging and never reach the mart (Part 6, §4). The **consent rate** comes from the cookie banner's own daily figures. Conversions are the Web orders GA4 measured, so the conversion rate also covers consenting visitors only.
+- **Social**: impressions are Instagram and Facebook impressions and TikTok video views; engagement is Instagram's interactions, Facebook's post engagements and TikTok's likes, comments and shares. The account insights carry no campaign, so campaigns are compared with social results by period.
+- **Support quality**: each Zendesk ticket carries the order number and the product the agent filled in. The order gives the **sales channel** (a Shopify order name for Web, a till ticket number for Store); the product comes from the ERP. The **CSAT rate** counts only tickets with a survey answer.
+
+**On the generated data**, the campaigns have a 30 % open rate and a 3 % click rate, and 64 web orders (4.5 k€) are attributed to them: in the synthetic data, clicks and orders are drawn apart, so this figure is low. The web funnel converts 2 % of sessions, as in Part 0, with a consent rate of 65 % on average; 634 rows of visitors who refused are dropped.
 
 ## Dashboard
 
@@ -211,8 +235,9 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 
 - `test_generate.py`: same seed gives the same files, volumes match Part 0, the data looks like the company (best sellers make most of the sales; stock follows the sales of each location and the factory makes about what the warehouse ships), and each source has its quirks.
 - `test_ingest.py`: every record is loaded unchanged with its metadata, a second run loads only new files, a changed file replaces its old rows, and paths with an apostrophe work.
-- `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 19 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
+- `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 20 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
   For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
+- `test_marketing_mart.py`: the marketing mart and support quality, against the source files, with a test campaign and a ticket about a store purchase added to them. The campaign counts only the order placed 2 days after a click, not the one 6 days after, not one before the click, and not one after a simple open; no order counts for two campaigns; the sessions of the mart are exactly the sessions of visitors who accepted cookies, and the consent rate is the banner's; social figures match the files; each ticket has the order, channel and SKU of its fields; support quality adds up the tickets, CSAT answers and reply times per month, channel and product; and the marts have every column planned in `governance/marts.csv`.
 - `test_customer_mart.py`: the customer mart, against the source files, with a household and a person under a second email added to them. Records sharing an email typed in another case or with spaces are one golden customer, in the sales and in support; a family sharing one phone is not merged; the same phone and first name are merged, and an unsubscribe in Klaviyo then removes the customer from the segments; customers who never consented or withdrew are not in the marketing segments; every sales row has a golden customer or the `anonymous` or `wholesale` member; omnichannel customers bought both online and in store; RFM segments follow the rules above; no email or phone reaches any mart; and `dim_customer` has every column planned in `governance/marts.csv`.
 - `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; stock that sold nothing is a slow mover, not an overstock; on every row, stock, demand, cover, sell-through and the four flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.
 - `test_dashboard.py`: the dashboard refuses raw, staging and intermediate tables and files, every query it sends reads only `marts` tables, the page runs no SQL of its own, and the warehouse is read-only. On a small generated warehouse, its figures match the mart: the totals and last year match `fct_sales_monthly`; a store, a category and some months match `fct_sales` this year and last year (net revenue, orders, average basket); a store sees the click-and-collect orders it hands over; channels and locations add up to the total; and the page opens without error, also with a store filter.

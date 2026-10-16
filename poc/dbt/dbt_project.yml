@@ -20,6 +20,9 @@ vars:
   # the last order that give recency scores 5, 4, 3 and 2; older is 1 (our assumption)
   rfm_window_months: 24
   rfm_recency_days: [30, 90, 180, 365]
+  # Marketing mart: a Web order counts for a campaign when placed within 5 days after a click on it (glossary,
+  # Attributed revenue)
+  attribution_window_days: 5
   # Inventory thresholds (glossary, Part 6): demand is the units sold over the last 28 days, a SKU is
   # overstocked above 180 days of cover, and at risk of a stockout below 14 days (our assumption: two
   # weeks for the factory or the warehouse to send more, to be agreed with the supply chain director)

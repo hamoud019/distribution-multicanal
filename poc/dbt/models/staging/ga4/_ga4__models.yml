@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_ga4__daily_traffic
+    description: Sessions and conversions per day, traffic source and consent state, from Google Analytics 4.
+    columns:
+      - name: date
+        data_tests: [not_null]
+      - name: traffic_source
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["organic search", "paid search", "social", "email", "direct", "other"]
+      - name: has_consent
+        description: False for the sessions of visitors who refused cookies. Never used in the marts.
+        data_tests: [not_null]
+
+  - name: stg_ga4__consent_daily
+    description: The cookie banner's figures per day.
+    columns:
+      - name: date
+        data_tests: [unique, not_null]

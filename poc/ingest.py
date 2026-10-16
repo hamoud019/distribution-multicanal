@@ -47,6 +47,7 @@ DATASETS = (
     Dataset("klaviyo", "campaigns", "klaviyo/campaigns.jsonl", "jsonl"),
     Dataset("klaviyo", "events", "klaviyo/events.jsonl", "jsonl"),
     Dataset("ga4", "daily_traffic", "ga4/daily_traffic.csv", "csv"),
+    Dataset("ga4", "consent_daily", "ga4/consent_daily.csv", "csv"),
     Dataset("social", "instagram", "social/instagram.jsonl", "jsonl"),
     Dataset("social", "facebook", "social/facebook.json", "json"),
     Dataset("social", "tiktok", "social/tiktok.csv", "csv"),

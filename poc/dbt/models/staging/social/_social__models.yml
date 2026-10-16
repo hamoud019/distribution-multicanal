@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_social__instagram
+    description: Instagram account insights per day. Engagement is Instagram's total interactions.
+    columns:
+      - name: date
+        data_tests: [unique, not_null]
+  - name: stg_social__facebook
+    description: Facebook page insights per day. Engagement is the page post engagements, followers the page fans.
+    columns:
+      - name: date
+        data_tests: [unique, not_null]
+  - name: stg_social__tiktok
+    description: TikTok account analytics per day. Impressions are the video views.
+    columns:
+      - name: date
+        data_tests: [unique, not_null]

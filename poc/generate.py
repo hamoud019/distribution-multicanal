@@ -84,6 +84,10 @@ CLICK_SHARE = 0.10              # openers who also click
 INSTAGRAM_FOLLOWERS = 150_000   # at the start of 2023
 WHOLESALE_PRICE_SHARE = 0.5     # wholesale price as a share of the retail price excl. VAT
 WEB_CONVERSION = 0.02           # orders per session (Part 0, section 4)
+CONSENT_RATE = (0.55, 0.75)     # visitors who accept analytics cookies in the banner, each day
+DENIED_ROW_SHARE = 0.10         # GA4 rows of visitors who refused (a tag firing before the banner), per day and source
+FIRST_REPLY_HOURS = 4           # typical hours before an agent's first reply (log-normal around it, at most 72)
+ORDER_FIELD, PRODUCT_FIELD = 360001, 360002  # Zendesk custom fields: order number and product SKU
 SIZE_WEIGHTS = (10, 30, 30, 20, 10)  # sales by size: mostly M and L
 POPULARITY_SPREAD = 1.5         # popularity of each product is log-normal: a few best sellers, a long tail
 LEAD_WEEKS = {"WH-AUB": 3, "ST-PAR": 1, "ST-TLS": 1}  # weeks to make a batch in the factory / to restock a store
@@ -165,6 +169,7 @@ class Generator:
         self.web_buyers = []      # people who have bought online at least once
         self.popularity = []      # cumulative sales weight of each SKU, for weighted picks
         self.sold = collections.Counter()  # units sold per (location that hands them over, SKU, day)
+        self.purchases = []       # (person index, order number, UTC moment, SKUs) of web orders and e-receipt tickets
         self.newcomers = []       # people who have not bought online yet, in random order
         # net revenue excl. VAT by (year, month) and channel, written to the general ledger
         self.net = {channel: collections.Counter() for _, channel in GL_ACCOUNTS}
@@ -301,6 +306,8 @@ class Generator:
                             {"line_item_id": line["id"], "quantity": 1, "subtotal": f"{amount:.2f}"}]})
                         local = paris_local(refunded_at)
                         self.net["Web"][(local.year, local.month)] -= amount / (1 + VAT)
+                if not cancelled:
+                    self.purchases.append((person_index, order["name"], created, [l["sku"] for l in lines]))
                 orders.append(order)
         orders.sort(key=lambda o: o["created_at"])
         write_jsonl(out / "shopify" / "orders.jsonl", orders)
@@ -334,10 +341,12 @@ class Generator:
         for (store, day), day_tickets in sorted(tickets.items()):
             rows, total = [], 0.0
             for ticket_no, moment in sorted(day_tickets, key=lambda t: t[1]):
-                email = ""
+                email, buyer, skus = "", None, []
                 if self.rng.random() < E_RECEIPT_SHARE:
-                    email = self.messy(self.people[self.pick_person()].email)
+                    buyer = self.pick_person()
+                    email = self.messy(self.people[buyer].email)
                 for product, qty in self.pick_lines(3):
+                    skus.append(product.sku)
                     if self.rng.random() < STORE_RETURN_SHARE:
                         qty = -1  # a return in store
                     discount = money(product.price_incl_vat * qty * 0.1) if self.rng.random() < 0.1 else 0.0
@@ -347,6 +356,9 @@ class Generator:
                         self.sold[(store, product.sku, day)] += qty
                     rows.append([ticket_no, moment.strftime("%d/%m/%Y %H:%M"), store, product.sku, qty,
                                  fr_number(product.price_incl_vat), fr_number(discount), fr_number(line_total), email])
+                if buyer is not None:
+                    utc = moment.replace(tzinfo=timezone.utc)
+                    self.purchases.append((buyer, ticket_no, utc - timedelta(hours=paris_offset(utc)), skus))
             self.net["Store"][(day.year, day.month)] += total / (1 + VAT)
             folder = out / "pos" / store
             write_csv(folder / f"tickets_{day:%Y%m%d}.csv", ["ticket_no", "date_heure", "magasin", "sku", "qte",
@@ -479,7 +491,8 @@ class Generator:
                 sent = datetime(year, 1, 3, 9, tzinfo=timezone.utc) + timedelta(days=n * 365 // CAMPAIGNS_PER_YEAR)
                 campaign_id = f"C{year}{n:03d}"
                 campaigns.append({"type": "campaign", "id": campaign_id, "attributes": {
-                    "name": f"Newsletter {sent:%Y-%m-%d}", "send_time": sent.isoformat(), "status": "Sent"}})
+                    "name": f"Newsletter {sent:%Y-%m-%d}", "send_time": sent.isoformat(), "status": "Sent",
+                    "statistics": {"recipients": len(subscribed), "delivered": len(subscribed)}}})
                 for profile_id in subscribed:
                     if self.rng.random() < OPEN_SHARE:
                         for metric in ("Opened Email",) + (("Clicked Email",) if self.rng.random() < CLICK_SHARE else ()):
@@ -492,45 +505,68 @@ class Generator:
 
     # --- web analytics: Google Analytics 4 export (daily totals only) ----------------------------------
     def ga4(self, out):
-        rows = []
+        """Daily sessions by traffic source. GA4 only loads after the visitor accepts cookies (Part 6), but a tag
+        firing before the banner on a few pages sends some sessions of visitors who refused: GA4 marks them
+        analytics_storage = "No", and the platform must drop them. The banner gives its own daily figures."""
+        rows, banner = [], []
         day = date(YEARS[0], 1, 1)
         while day.year <= YEARS[-1]:
             orders_today = WEB_ORDERS_PER_YEAR * self.scale * MONTH_WEIGHTS[day.month - 1] / sum(MONTH_WEIGHTS) / 30
+            accepted = 0
             for channel in WEB_CHANNELS:
                 share = self.rng.uniform(0.05, 0.35)
                 sessions = max(0, round(orders_today * share / WEB_CONVERSION * self.rng.uniform(0.8, 1.2)))
-                rows.append([day.strftime("%Y%m%d"), channel, sessions, round(sessions * self.rng.uniform(0.01, 0.03))])
+                rows.append([day.strftime("%Y%m%d"), channel, "Yes", sessions,
+                             round(sessions * self.rng.uniform(0.01, 0.03))])
+                accepted += sessions
+                if self.rng.random() < DENIED_ROW_SHARE:
+                    refused = max(1, round(sessions * self.rng.uniform(0.05, 0.3)))
+                    rows.append([day.strftime("%Y%m%d"), channel, "No", refused, round(refused * 0.02)])
+            rate = self.rng.uniform(*CONSENT_RATE)
+            banner.append([day.isoformat(), round(accepted / rate), accepted])
             day += timedelta(days=1)
-        write_csv(out / "ga4" / "daily_traffic.csv", ["date", "sessionDefaultChannelGroup", "sessions", "conversions"],
-                  rows)
+        write_csv(out / "ga4" / "daily_traffic.csv",
+                  ["date", "sessionDefaultChannelGroup", "analytics_storage", "sessions", "conversions"], rows)
+        write_csv(out / "ga4" / "consent_daily.csv", ["date", "banner_views", "accepted"], banner)
 
     # --- social media: three platforms, three formats -------------------------------------------------
     def social(self, out):
         instagram, facebook, tiktok = [], [], []
         day, followers = date(YEARS[0], 1, 1), INSTAGRAM_FOLLOWERS
+        fans, tiktok_followers = INSTAGRAM_FOLLOWERS // 2, INSTAGRAM_FOLLOWERS // 5  # our assumption: smaller accounts
         while day.year <= YEARS[-1]:
             followers += self.rng.randint(-20, 80)
+            fans += self.rng.randint(-10, 30)
+            tiktok_followers += self.rng.randint(-10, 60)
             instagram.append({"date": day.isoformat(), "reach": self.rng.randint(5_000, 40_000),
-                              "impressions": self.rng.randint(10_000, 80_000), "follower_count": followers})
+                              "impressions": self.rng.randint(10_000, 80_000), "follower_count": followers,
+                              "total_interactions": self.rng.randint(200, 3_000)})
             facebook.append({"end_time": f"{day.isoformat()}T08:00:00+0000", "page_impressions":
-                             self.rng.randint(2_000, 20_000), "page_post_engagements": self.rng.randint(50, 900)})
-            tiktok.append([day.strftime("%m/%d/%Y"), self.rng.randint(1_000, 60_000), self.rng.randint(20, 3_000)])
+                             self.rng.randint(2_000, 20_000), "page_post_engagements": self.rng.randint(50, 900),
+                             "page_fans": fans})
+            tiktok.append([day.strftime("%m/%d/%Y"), self.rng.randint(1_000, 60_000), self.rng.randint(20, 3_000),
+                           self.rng.randint(0, 200), self.rng.randint(0, 150), tiktok_followers])
             day += timedelta(days=1)
         write_jsonl(out / "social" / "instagram.jsonl", instagram)
         write_json(out / "social" / "facebook.json", {"data": facebook, "paging": {}})
-        write_csv(out / "social" / "tiktok.csv", ["Date", "Video Views", "Likes"], tiktok)
+        write_csv(out / "social" / "tiktok.csv", ["Date", "Video Views", "Likes", "Comments", "Shares", "Followers"],
+                  tiktok)
 
     # --- customer support: Zendesk ---------------------------------------------------------------------
     def zendesk(self, out):
+        """Each ticket is about one purchase, a few days after it: a web order or a store ticket with an
+        e-receipt. The agent fills in the order number and the product (two custom fields)."""
         subjects = (("Where is my order?", "delivery"), ("Wrong size, can I exchange?", "exchange"),
                     ("Hole after two washes", "quality"), ("Refund not received", "refund"),
                     ("Skin reaction to the fabric", "quality"))
         tickets = []
         for year in YEARS:
+            bought = [p for p in self.purchases if p[2].year == year]
             for n in range(self.scaled(SUPPORT_TICKETS_PER_YEAR)):
-                person = self.people[self.rng.choice(self.web_buyers)]
-                subject, category = self.rng.choice(subjects)
-                created = self.random_moment(year)
+                person_index, order_number, bought_at, skus = self.rng.choice(bought)
+                person = self.people[person_index]
+                subject, category = self.rng.choice(subjects if order_number.startswith("#") else subjects[1:])
+                created = bought_at + timedelta(days=self.rng.randint(2, 20), hours=self.rng.randint(0, 9))
                 tickets.append({
                     "id": year * 10_000 + n, "created_at": created.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "requester": {"email": self.messy(person.email), "name": f"{person.first_name} {person.last_name}"},
@@ -538,6 +574,10 @@ class Generator:
                     "tags": [category], "status": self.rng.choice(("solved", "solved", "closed", "open")),
                     "via": {"channel": self.rng.choice(("email", "web", "chat"))},
                     "satisfaction_rating": {"score": self.rng.choice(("good", "good", "bad", "unoffered"))},
+                    "custom_fields": [{"id": ORDER_FIELD, "value": order_number},
+                                      {"id": PRODUCT_FIELD, "value": self.rng.choice(skus)}],
+                    "metrics": {"reply_time_in_minutes": {"calendar": min(
+                        round(self.rng.lognormvariate(math.log(FIRST_REPLY_HOURS * 60), 0.8)), 72 * 60)}},
                 })
         tickets.sort(key=lambda t: t["created_at"])
         write_jsonl(out / "zendesk" / "tickets.jsonl", tickets)

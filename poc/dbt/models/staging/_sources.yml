@@ -90,6 +90,9 @@ sources:
         error_after: {count: 50, period: hour}
     tables:
       - name: daily_traffic
+        description: Sessions and conversions per day and traffic source, with the consent state of the visitors.
+      - name: consent_daily
+        description: The cookie banner's daily figures (Consent Mode); how many visitors saw it and accepted.
 
   - name: social
     description: Daily account totals from Instagram, Facebook and TikTok, each in its own format.
