@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: >
+      The customer dimension: one row per golden customer found in the sales or in support, and two members
+      that are not people ("anonymous" store tickets, "wholesale" companies). No name, email, phone or
+      address: only the pseudonymous customer key (Part 6).
+    columns:
+      - name: customer_key
+        description: "Customer key (glossary): pseudonymous id of the golden customer, or the member's name."
+        data_tests: [unique, not_null]
+      - name: customer_type
+        description: "Customer type (glossary): person, anonymous or wholesale."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["person", "anonymous", "wholesale"]
+      - name: first_order_date
+        description: "First order date (glossary): first Web or Store order."
+      - name: last_order_date
+        description: "Last order date (glossary): most recent Web or Store order."
+      - name: order_count
+        description: "Order count (glossary): Web and Store orders, all years."
+      - name: is_repeat_customer
+        description: "Repeat customer (glossary): 2 orders or more."
+      - name: is_omnichannel
+        description: "Omnichannel customer (glossary): at least one Web order and one Store order."
+      - name: recency_score
+        description: "Recency score (glossary): 5 for an order in the last 30 days, down to 1 for more than a year."
+      - name: frequency_score
+        description: "Frequency score (glossary): Web and Store orders in the last 24 months, capped at 5."
+      - name: monetary_score
+        description: "Monetary score (glossary): net revenue of the last 24 months, 1 to 5 (five groups of the same size)."
+      - name: rfm_segment
+        description: "RFM segment (glossary). Empty for a person with no order (only a support ticket or a return)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Champions", "Loyal", "New", "Promising", "At risk", "Hibernating", "Needs attention", "Lost"]
+      - name: marketing_consent
+        description: "Marketing consent (glossary): given in Shopify or Klaviyo and withdrawn in neither."
+        data_tests: [not_null]
+      - name: age_band
+        description: "Age band (glossary), from the Klaviyo birthday; 'unknown' without one."
+      - name: region
+        description: "Region (glossary): department of the most recent web shipping address, else of the account."
+
+  - name: marketing_segments
+    description: >
+      The customers marketing may target, with their RFM segment. Only persons with marketing consent:
+      checked every run by the test assert_marketing_segments_have_consent.
+    columns:
+      - name: customer_key
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+      - name: rfm_segment
+        data_tests: [not_null]

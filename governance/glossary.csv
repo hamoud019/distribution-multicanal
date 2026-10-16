@@ -22,10 +22,15 @@ Average basket,Net revenue divided by number of orders over a period (63 EUR exc
 Customer,"A person who has placed at least one Web or Store order, as known in one source tool",Marketing director
 Golden customer,"The single record for one real person after matching all source records (Shopify, Klaviyo, POS, Zendesk)",Marketing director
 Customer key,Pseudonymous identifier of a golden customer; the only customer identifier allowed in the marts,Marketing director
+Customer type,"Person (a golden customer), anonymous (store tickets without an email) or wholesale (orders of companies); every sales row has one",Marketing director
+Omnichannel customer,A golden customer with at least one Web order and at least one Store order,Marketing director
 First order date,Date of the first Web or Store order of a golden customer,Marketing director
 Last order date,Date of the most recent Web or Store order of a golden customer,Marketing director
 Order count,Number of Web and Store orders of a golden customer,Marketing director
 Repeat customer,A golden customer with 2 orders or more (42 % of customers in 2025),Marketing director
+Recency score,"1 to 5 from the days since the last Web or Store order: 30 days or less 5, 90 days 4, 180 days 3, a year 2, older 1",Marketing director
+Frequency score,"1 to 5 from the Web and Store orders of the last 24 months (5 = five orders or more)",Marketing director
+Monetary score,"1 to 5 from the net revenue of the last 24 months, in five groups of the same size (5 = the most)",Marketing director
 RFM segment,"Group of customers by Recency, Frequency and Monetary value of their orders over the last 24 months",Marketing director
 Marketing consent,"Whether the person may receive marketing emails/SMS: explicit consent, or the CNIL existing-customer exception; withdrawal always wins",DPO
 Age band,"Age grouped in bands (under 25, 25-34, 35-44, 45-54, 55+) instead of birth date",Marketing director
@@ -52,6 +57,8 @@ Social platform,"Instagram, Facebook or TikTok account of the brand",Marketing d
 Engagement,"Likes + comments + shares + saves on the brand's posts, per platform and day",Marketing director
 Followers,Number of followers of a social account at the end of the day,Marketing director
 Ticket,A customer request in Zendesk (email or chat),Customer service manager
+Contact channel,"How the customer reached customer service: email, web form or chat",Customer service manager
+Ticket status,"Where a ticket stands in Zendesk: open, solved or closed",Customer service manager
 Ticket category,"Reason of a ticket: delivery, size/exchange, product quality, payment, other",Customer service manager
 First response time,Hours between ticket creation and the first reply from an agent,Customer service manager
 CSAT,Customer satisfaction score given after a ticket is solved (satisfied / not satisfied),Customer service manager

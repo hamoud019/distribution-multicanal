@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: fct_ticket
+    description: >
+      One row per Zendesk ticket, linked to the golden customer of the requester (story 14). The first
+      response time and the support quality figures come with the marketing and support mart (issue #13).
+    columns:
+      - name: ticket_id
+        description: "Ticket (glossary): the Zendesk ticket number."
+        data_tests: [unique, not_null]
+      - name: created_date
+        description: "Date (glossary): day the ticket was opened, Paris time."
+        data_tests: [not_null]
+      - name: customer_key
+        description: "Customer key (glossary) of the requester; 'anonymous' when the email matches nobody."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+      - name: ticket_category
+        description: "Ticket category (glossary)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["delivery", "size/exchange", "product quality", "payment", "other"]
+      - name: contact_channel
+        description: "Contact channel (glossary): email, web or chat."
+      - name: status
+        description: "Ticket status (glossary): open, solved or closed."
+      - name: csat
+        description: "CSAT (glossary): satisfied or not satisfied; empty when the survey was not offered."

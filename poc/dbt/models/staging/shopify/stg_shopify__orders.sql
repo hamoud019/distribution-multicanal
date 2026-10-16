@@ -1,5 +1,6 @@
 -- Shopify orders, one row per order. Shopify gives Paris local time with its offset, so the local time is
--- the first 19 characters. The email and the shipping address stay in the raw layer (Part 6: restricted).
+-- the first 19 characters. The email and the shipping address stay in the raw layer (Part 6: restricted):
+-- only the department of the shipping postcode comes through.
 
 with source as (
     select payload::json as o, _batch_id, _loaded_at from {{ source('shopify', 'orders') }}
@@ -16,6 +17,7 @@ select
     o->>'fulfillment_location'                                         as fulfillment_location_code,
     cast(o->>'total_price' as decimal(12, 2))                          as total_incl_vat,
     cast(o->>'$.shipping_lines[0].price' as decimal(12, 2))            as shipping_incl_vat,
+    left(o->>'$.shipping_address.zip', 2)                              as shipping_department,
     _batch_id,
     _loaded_at
 from source

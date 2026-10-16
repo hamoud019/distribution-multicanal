@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_klaviyo__profiles
+    description: One row per Klaviyo profile, without contact data (only matching keys).
+    columns:
+      - name: klaviyo_profile_id
+        data_tests: [unique, not_null]
+      - name: shopify_customer_id
+        description: Set when the profile was synced from Shopify (matching rule 3).
+      - name: consent_state
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["SUBSCRIBED", "UNSUBSCRIBED", "NEVER_SUBSCRIBED"]

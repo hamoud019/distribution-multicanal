@@ -18,7 +18,7 @@ Spec and work breakdown: issue #1.
 
 ## Proof of concept
 
-A local version of the chosen platform on synthetic data: the 7 sources, a raw layer, and dbt models up to the Sales Performance mart, reconciled with the ERP finance figures. One command, no cloud account (Python 3.10 to 3.13):
+A local version of the chosen platform on synthetic data: the 7 sources, a raw layer, and dbt models up to the Sales Performance, Customer and Inventory marts. One command, no cloud account (Python 3.10 to 3.13):
 
 ```
 py -3.12 poc/run.py

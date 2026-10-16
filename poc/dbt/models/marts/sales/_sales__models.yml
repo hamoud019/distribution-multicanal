@@ -79,9 +79,14 @@ models:
                 field: sku
       - name: customer_key
         description: >
-          Customer key (glossary). Placeholder until the golden customer (issue #11): a pseudonymous key per
-          Shopify account. Empty for store tickets (anonymous) and wholesale (companies, not people).
-        meta: {placeholder_until: "#11"}
+          Customer key (glossary): the golden customer of the Shopify customer or of the store ticket's
+          e-receipt email; "anonymous" for a store ticket without an email, "wholesale" for a wholesale order.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
       - name: quantity
         description: Units sold; negative for a return.
       - name: gross_revenue

@@ -138,6 +138,21 @@ class FullSample(unittest.TestCase):
         self.assertTrue(any(e != e.strip() for e in emails))
         self.assertTrue(any(e.strip() != e.strip().lower() for e in emails))
 
+    def test_the_golden_customer_has_households_phone_formats_and_withdrawn_consents_to_solve(self):
+        phones = [p["attributes"]["phone_number"] for p in self.profiles if p["attributes"]["phone_number"]]
+        self.assertTrue(any(ph.startswith("+33") for ph in phones) and any(ph.startswith("0") for ph in phones))
+        # a family: one phone, several first names
+        names_by_phone = collections.defaultdict(set)
+        for c in self.customers:
+            if c["phone"]:
+                names_by_phone[c["phone"]].add(c["first_name"])
+        self.assertTrue(any(len(names) > 1 for names in names_by_phone.values()))
+        # unsubscribed in Klaviyo, still subscribed in Shopify
+        shopify = {c["email"].strip().lower(): c["email_marketing_consent"]["state"] for c in self.customers}
+        self.assertTrue(any(shopify.get(p["attributes"]["email"].strip().lower()) == "subscribed"
+                            and p["attributes"]["subscriptions"]["email"]["marketing"]["consent"] == "UNSUBSCRIBED"
+                            for p in self.profiles))
+
     def test_each_tool_keeps_its_own_date_format(self):
         self.assertRegex(self.orders[0]["created_at"], r"\+0[12]:00$")
         self.assertRegex(csv_rows(self.out / "ga4" / "daily_traffic.csv")[0]["date"], r"^\d{8}$")

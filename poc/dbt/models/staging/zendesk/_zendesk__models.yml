@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: stg_zendesk__tickets
+    description: One row per Zendesk ticket, without the requester's contact data or the free text.
+    columns:
+      - name: ticket_id
+        data_tests: [unique, not_null]
+      - name: created_date
+        description: Local Paris date the ticket was opened.
+        data_tests: [not_null]

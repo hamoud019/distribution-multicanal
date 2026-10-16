@@ -1,6 +1,21 @@
 version: 2
 
 models:
+  - name: stg_shopify__customers
+    description: One row per Shopify customer, without contact data (only matching keys and the department).
+    columns:
+      - name: shopify_customer_id
+        data_tests: [unique, not_null]
+      - name: email_key
+        description: Hash of the email in lower case without spaces (matching rule 1).
+      - name: phone_key
+        description: Hash of the phone in +33 format with the first name (matching rule 2).
+      - name: consent_state
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["subscribed", "not_subscribed", "unsubscribed"]
+
   - name: stg_shopify__orders
     description: One row per Shopify order. Amounts include VAT, as Shopify sends them.
     columns:

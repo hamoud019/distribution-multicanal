@@ -1,6 +1,6 @@
 kind,rank,rule,detail
 match,1,Same normalized email,"Lower-case, trim spaces; exact match across Shopify, Klaviyo, POS e-receipts and Zendesk; merge automatically"
-match,2,Same normalized phone,Converted to international format (+33...); exact match; merge automatically
+match,2,Same normalized phone and first name,"Phone converted to international format (+33...), exact match, and the same first name; merge automatically. A household sharing one phone (different first names) is not merged"
 match,3,Same source id link,"When a tool stores another tool's id (for example a Klaviyo profile synced from Shopify with the Shopify customer id), merge automatically"
 match,4,Same last name + first name + postcode,"Never merged automatically: sent to the CRM manager for review (two people can share a name, a family can share an address)"
 survivorship,1,Email,"Most recent email used in a Shopify order, else most recent in Klaviyo"

@@ -16,6 +16,10 @@ vars:
   # Largest accepted gap between the sales mart and the ERP general ledger, per month and channel,
   # as a share of the ERP figure (Part 4, section 4: our choice, to be agreed with the CFO)
   reconciliation_tolerance: 0.005
+  # RFM segments (Customer mart): orders of the last 24 months (glossary, RFM segment), and the days since
+  # the last order that give recency scores 5, 4, 3 and 2; older is 1 (our assumption)
+  rfm_window_months: 24
+  rfm_recency_days: [30, 90, 180, 365]
   # Inventory thresholds (glossary, Part 6): demand is the units sold over the last 28 days, a SKU is
   # overstocked above 180 days of cover, and at risk of a stockout below 14 days (our assumption: two
   # weeks for the factory or the warehouse to send more, to be agreed with the supply chain director)

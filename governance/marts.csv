@@ -21,14 +21,24 @@ sales,dim_product,size,Size
 sales,dim_product,colour,Colour
 sales,dim_product,unit_cost,Unit cost
 customer,dim_customer,customer_key,Customer key
+customer,dim_customer,customer_type,Customer type
+customer,dim_customer,is_omnichannel,Omnichannel customer
 customer,dim_customer,first_order_date,First order date
 customer,dim_customer,last_order_date,Last order date
 customer,dim_customer,order_count,Order count
 customer,dim_customer,is_repeat_customer,Repeat customer
+customer,dim_customer,recency_score,Recency score
+customer,dim_customer,frequency_score,Frequency score
+customer,dim_customer,monetary_score,Monetary score
 customer,dim_customer,rfm_segment,RFM segment
 customer,dim_customer,marketing_consent,Marketing consent
 customer,dim_customer,age_band,Age band
 customer,dim_customer,region,Region
+customer,marketing_segments,customer_key,Customer key
+customer,marketing_segments,rfm_segment,RFM segment
+customer,marketing_segments,is_omnichannel,Omnichannel customer
+customer,marketing_segments,region,Region
+customer,marketing_segments,age_band,Age band
 inventory,fct_stock_snapshot,snapshot_date,Snapshot date
 inventory,fct_stock_snapshot,location,Location
 inventory,fct_stock_snapshot,sku,SKU
@@ -62,5 +72,7 @@ support,fct_ticket,created_date,Date
 support,fct_ticket,ticket_id,Ticket
 support,fct_ticket,customer_key,Customer key
 support,fct_ticket,ticket_category,Ticket category
+support,fct_ticket,contact_channel,Contact channel
+support,fct_ticket,status,Ticket status
 support,fct_ticket,first_response_hours,First response time
 support,fct_ticket,csat,CSAT

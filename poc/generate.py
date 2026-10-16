@@ -75,6 +75,8 @@ E_RECEIPT_SHARE = 0.60          # store tickets sent by email
 STORE_RETURN_SHARE = 0.03       # store lines that are a return
 UNIT_COST_SHARE = (0.30, 0.45)  # production cost as a share of the price excl. VAT
 SUBSCRIBED_SHARE = 0.35         # people subscribed to emails (Part 3: 300,000 of 850,000)
+WITHDRAWN_SHARE = 0.10          # subscribers who later unsubscribed in Klaviyo, while Shopify still says "subscribed"
+HOUSEHOLD_SHARE = 0.03          # people who share a phone with a family member (same last name and address)
 KLAVIYO_SHARE = 0.70            # people with a Klaviyo profile
 OTHER_EMAIL_SHARE = 0.10        # Klaviyo profiles with another email than Shopify
 OPEN_SHARE = 0.30               # subscribers who open a campaign (Part 3)
@@ -105,6 +107,7 @@ class Person:
     city: str
     birthday: date
     subscribed: bool
+    withdrawn: bool = False  # unsubscribed later, in Klaviyo only
 
 
 @dataclass
@@ -152,6 +155,9 @@ def paris_local(moment_utc):
 class Generator:
     def __init__(self, seed, scale):
         self.rng = random.Random(seed)
+        # The identity problems of the golden customer (households, phone formats, withdrawn consent) use their
+        # own draws, so adding them did not change the sales and stock drawn with self.rng.
+        self.quirks = random.Random(f"{seed}-identities")
         self.scale = scale
         self.people = []
         self.products = []
@@ -182,6 +188,13 @@ class Generator:
             return f" {email.upper()} "
         return email
 
+    def national(self, phone):
+        """The phone as typed in France, sometimes: +33612345678 -> 06 12 34 56 78."""
+        if self.quirks.random() < 0.5:
+            digits = "0" + phone[3:]
+            return " ".join(digits[n:n + 2] for n in range(0, 10, 2))
+        return phone
+
     # --- master data -------------------------------------------------------------------------
     def make_people(self):
         for i in range(self.scaled(CUSTOMERS)):
@@ -194,6 +207,13 @@ class Generator:
                 date(self.rng.randint(1950, 2004), self.rng.randint(1, 12), self.rng.randint(1, 28)),
                 self.rng.random() < SUBSCRIBED_SHARE,
             ))
+        for i, p in enumerate(self.people):
+            # a family member: same phone, last name and address, another first name (must not be merged)
+            if i and self.quirks.random() < HOUSEHOLD_SHARE:
+                head = self.people[self.quirks.randrange(i)]
+                if head.first_name != p.first_name:
+                    p.last_name, p.phone, p.postcode, p.city = head.last_name, head.phone, head.postcode, head.city
+            p.withdrawn = p.subscribed and self.quirks.random() < WITHDRAWN_SHARE
 
     def make_products(self):
         total = 0.0
@@ -441,12 +461,13 @@ class Generator:
             if i in self.shopify_ids and self.rng.random() < 0.6:  # synced from Shopify: carries its id
                 properties["shopify_customer_id"] = str(self.shopify_ids[i])
             profiles.append({"type": "profile", "id": ids[i], "attributes": {
-                "email": self.messy(email), "phone_number": p.phone if self.rng.random() < 0.4 else None,
+                "email": self.messy(email), "phone_number": self.national(p.phone) if self.rng.random() < 0.4 else None,
                 "first_name": p.first_name, "last_name": p.last_name,
                 "location": {"city": p.city, "zip": p.postcode},
                 "properties": {**properties, "birthday": p.birthday.isoformat() if self.rng.random() < 0.3 else None},
                 "subscriptions": {"email": {"marketing": {
-                    "consent": "SUBSCRIBED" if p.subscribed else "UNSUBSCRIBED"}}},
+                    "consent": "UNSUBSCRIBED" if p.withdrawn else "SUBSCRIBED" if p.subscribed
+                    else "NEVER_SUBSCRIBED"}}},
             }})
         write_jsonl(out / "klaviyo" / "profiles.jsonl", profiles)
 

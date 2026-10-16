@@ -9,6 +9,10 @@ with lines as (
 
 products as (
     select * from {{ ref('stg_erp__items') }}
+),
+
+identities as (
+    select record_id, customer_key from {{ ref('int_customers__identity_map') }}
 )
 
 select
@@ -19,10 +23,11 @@ select
     lines.order_line,
     lines.wholesale_account,
     lines.sku,
-    -- Placeholder until the golden customer (issue #11): a pseudonymous key per Shopify account.
-    -- Store tickets stay anonymous and wholesale accounts are companies, so they have no customer key.
-    case when lines.shopify_customer_id is not null
-        then md5('shopify|' || lines.shopify_customer_id) end      as customer_key,
+    -- The golden customer of the Shopify customer or of the store ticket's e-receipt email. A store ticket
+    -- without an email belongs to the "anonymous" member, a wholesale order to the "wholesale" member
+    -- (a company is not a person), so every row has a key of dim_customer.
+    coalesce(identities.customer_key,
+        case lines.channel when 'Wholesale' then 'wholesale' else 'anonymous' end) as customer_key,
     lines.quantity,
     lines.gross_revenue,
     lines.discount,
@@ -32,3 +37,8 @@ select
     lines.is_click_and_collect
 from lines
 left join products using (sku)
+left join identities
+    on identities.record_id = case lines.channel
+        when 'Web' then 'shopify:' || lines.shopify_customer_id
+        when 'Store' then 'pos:' || lines.order_id
+    end
