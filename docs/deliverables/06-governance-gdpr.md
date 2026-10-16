@@ -12,7 +12,7 @@ The rules are kept as files in `governance/`, so the platform can read them (for
 | `marts.csv` | every column of the planned report tables, linked to a glossary term |
 | `mdm_rules.csv` | customer matching and "which value wins" rules |
 | `pii_inventory.csv` | every personal-data field of the 7 sources and its treatment |
-| `retention.csv` | legal basis and retention period for each of the 17 datasets |
+| `retention.csv` | legal basis and retention period for each of the 20 datasets |
 | `erasure_steps.csv` | the right-to-erasure procedure, from the source tools to Power BI |
 | `rbac.csv`, `raci.csv` | who can see what, and who is responsible for what |
 
@@ -127,7 +127,7 @@ Summary by source (the full list of 38 fields is in `pii_inventory.csv`):
 | Web analytics (daily totals) | 25 months | collection | our choice: we reuse the 25-month limit the CNIL sets for audience measurement [2] as a reasonable maximum |
 | Stock, production, campaign and social totals | 5–10 years | record date | not personal data |
 
-The full list, with one rule for each of the 17 datasets of the personal-data inventory (including the ones we don't load), is in `retention.csv`.
+The full list, with one rule for each of the 17 datasets of the personal-data inventory (including the ones we don't load) and for 3 more datasets the proof of concept loads (ERP sales lines and general ledger, cookie banner figures), is in `retention.csv`. The proof of concept applies these rules in a cleanup step (`poc/retention.py`).
 
 ### Right to erasure: from the source to Power BI
 

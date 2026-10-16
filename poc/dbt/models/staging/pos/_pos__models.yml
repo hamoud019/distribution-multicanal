@@ -20,6 +20,7 @@ models:
       - name: has_e_receipt
         description: True when the customer asked for an e-receipt by email. The email itself stays in the raw layer.
       - name: email_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: Hash of the e-receipt email in lower case without spaces (matching rule 1). Empty without an e-receipt.
 
   - name: stg_pos__z_reports

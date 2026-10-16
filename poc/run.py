@@ -1,10 +1,11 @@
-"""The proof of concept in one command: generate -> ingest -> freshness -> dbt build -> docs.
+"""The proof of concept in one command: generate -> ingest -> retention -> freshness -> dbt build -> docs.
 
     py -3.12 poc/run.py                 # Windows (any Python 3.10 to 3.13 works)
     python3 poc/run.py                  # macOS / Linux
     py -3.12 poc/run.py --incremental   # keep the warehouse and load only new files
     py -3.12 poc/run.py --docs          # open the dbt docs and lineage graph in the browser
     py -3.12 poc/run.py --dashboard     # open the Sales Performance dashboard in the browser
+    py -3.12 poc/run.py --erase EMAIL   # erase one person from every layer (right to erasure)
 
 The first run creates a virtual environment in poc/.venv and installs poc/requirements.txt
 (dbt-core, dbt-duckdb, duckdb, streamlit). No cloud account is needed: DuckDB stands in for the
@@ -13,6 +14,7 @@ cloud warehouse (Fabric in the study) in a single local file, poc/data/warehouse
 
 import argparse
 import os
+from datetime import date
 import subprocess
 import sys
 import venv
@@ -76,11 +78,17 @@ def main():
     parser.add_argument("--docs", action="store_true", help="serve the dbt docs of the last run, then stop")
     parser.add_argument("--dashboard", action="store_true",
                         help="open the Sales Performance dashboard on the last run's warehouse, then stop")
+    parser.add_argument("--erase", metavar="EMAIL",
+                        help="erase the person with this email from every layer of the last run's warehouse, then stop")
     args = parser.parse_args()
 
     ensure_environment()
     warehouse = DATA / "warehouse.duckdb"
     os.environ["LSF_POC_WAREHOUSE"] = str(warehouse)
+    sys.path.insert(0, str(POC))
+    from keys import ENV, pseudonymization_key
+
+    os.environ[ENV] = pseudonymization_key()  # the secret key of the customer keys, never committed
     if args.docs:
         run_dbt("docs", "serve")
         return
@@ -92,9 +100,20 @@ def main():
                                   "--server.showEmailPrompt", "false", "--browser.gatherUsageStats", "false",
                                   "--client.toolbarMode", "viewer"]))
 
-    sys.path.insert(0, str(POC))
-    from generate import generate
+    if args.erase:
+        from erase import erase
+
+        if not warehouse.exists():
+            sys.exit("The warehouse is not built yet. Run py -3.12 poc/run.py first.")
+        print("== Erasing the person from the raw layer and adding them to the suppression list")
+        for table, rows in erase(warehouse, args.erase).items():
+            print(f"   {table:28} {rows:>9,} rows deleted or anonymized")
+        run_dbt("build")  # the person leaves staging, intermediate and the marts
+        return
+
+    from generate import YEARS, generate
     from ingest import ingest
+    from retention import cleanup
 
     if not args.incremental and warehouse.exists():
         warehouse.unlink()
@@ -104,6 +123,11 @@ def main():
     print("== Loading them into the raw layer")
     for table, rows in ingest(DATA / "landing", warehouse).items():
         print(f"   {table:28} {rows:>9,} new rows")
+    today = date(YEARS[-1], 12, 31)  # the last day of the synthetic data is the proof of concept's "today"
+    print(f"== Applying the retention periods as of {today}")
+    for rule, rows in cleanup(warehouse, today).items():
+        if rows:
+            print(f"   {rule:40} {rows:>9,} rows deleted or anonymized")
 
     run_dbt("source", "freshness")  # stale sources are flagged before the reports are rebuilt
     run_dbt("build")

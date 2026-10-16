@@ -18,6 +18,10 @@ sources:
     tables:
       - name: ticket_lines
         description: One row per ticket line, amounts including VAT, as exported by the tills.
+        columns:
+          - name: email_ticket
+            description: The e-receipt email. Raw layer only (Part 6, restricted).
+            config: {meta: {pii: contact, treatment: restrict}}
       - name: z_reports
         description: End-of-day totals printed by each till (Z report), used to check the sales.
 
@@ -32,7 +36,15 @@ sources:
         error_after: {count: 3, period: hour}
     tables:
       - name: orders
+        columns:
+          - name: payload
+            description: "The whole JSON record. Holds the customer's email and shipping address: raw layer only (Part 6, restricted)."
+            config: {meta: {pii: contact, treatment: restrict}}
       - name: customers
+        columns:
+          - name: payload
+            description: "The whole JSON record. Holds the email, phone, names and address: raw layer only (Part 6, restricted)."
+            config: {meta: {pii: contact, treatment: restrict}}
 
   - name: erp
     description: Microsoft Dynamics 365 Business Central exports (wholesale, items, stock, production, finance).
@@ -64,8 +76,16 @@ sources:
         error_after: {count: 6, period: hour}
     tables:
       - name: profiles
+        columns:
+          - name: payload
+            description: "The whole JSON record. Holds the email, phone, names, city and birthday: raw layer only (Part 6, restricted)."
+            config: {meta: {pii: contact, treatment: restrict}}
       - name: campaigns
       - name: events
+        columns:
+          - name: payload
+            description: "The whole JSON record. Holds the profile id of each open and click: raw layer only (Part 6, restricted)."
+            config: {meta: {pii: contact, treatment: restrict}}
 
   - name: zendesk
     description: Customer support tickets on Zendesk.
@@ -78,6 +98,10 @@ sources:
         error_after: {count: 6, period: hour}
     tables:
       - name: tickets
+        columns:
+          - name: payload
+            description: "The whole JSON record. Holds the requester's email and name and the free text of the ticket: raw layer only (Part 6, restricted)."
+            config: {meta: {pii: contact, treatment: restrict}}
 
   - name: ga4
     description: Google Analytics 4 daily totals by traffic channel (only consenting visitors).
@@ -107,3 +131,13 @@ sources:
       - name: instagram
       - name: facebook
       - name: tiktok
+
+  - name: meta
+    description: The platform's own tables, kept next to the raw layer.
+    schema: raw_meta
+    tables:
+      - name: erasure_suppression
+        description: >
+          The erasure suppression list (Part 6, section 4, step 3): the keyed hashes of the emails, phones and
+          source ids of every person who asked to be erased. Staging drops or anonymizes their records, so
+          data a tool sends again never comes back. Filled by poc/erase.py.

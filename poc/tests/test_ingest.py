@@ -39,7 +39,7 @@ class Ingestion(unittest.TestCase):
     def test_every_dataset_gets_its_own_raw_table(self):
         tables = {f"{s}.{t}" for s, t in self.query(
             "select table_schema, table_name from information_schema.tables where table_schema like 'raw_%'")}
-        expected = {f"raw_{d.source}.{d.table}" for d in DATASETS} | {"raw_meta.load_log"}
+        expected = {f"raw_{d.source}.{d.table}" for d in DATASETS} | {"raw_meta.load_log", "raw_meta.erasure_suppression"}
         self.assertEqual(tables, expected)
 
     def test_every_record_of_every_file_is_loaded(self):

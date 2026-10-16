@@ -24,6 +24,7 @@ except ImportError:
 import generate  # noqa: E402
 
 VAT = Decimal("1.20")
+TEST_KEY = "test-key-of-the-pseudonymization"  # the tests' own secret key, so their hashes can be checked
 
 
 def run_dbt(warehouse, target, *command):
@@ -32,7 +33,8 @@ def run_dbt(warehouse, target, *command):
         [sys.executable, "-c", "from dbt.cli.main import cli; cli()", *command,
          "--project-dir", str(POC / "dbt"), "--profiles-dir", str(POC / "dbt"),
          "--target-path", str(target), "--quiet"],
-        env={**os.environ, "LSF_POC_WAREHOUSE": str(warehouse)}, capture_output=True, text=True)
+        env={**os.environ, "LSF_POC_WAREHOUSE": str(warehouse), "LSF_POC_PSEUDONYMIZATION_KEY": TEST_KEY},
+        capture_output=True, text=True)
 
 
 def failed_tests(target):

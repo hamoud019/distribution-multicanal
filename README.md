@@ -28,7 +28,7 @@ Then `py -3.12 poc/run.py --dashboard` opens the Sales Performance dashboard. Se
 
 ## Governance rules
 
-The glossary, planned report tables, personal-data inventory, retention periods, erasure steps and access model are CSV files in [`governance/`](governance), checked by `analysis/test_governance.py`.
+The glossary, planned report tables, personal-data inventory, retention periods, erasure steps and access model are CSV files in [`governance/`](governance), checked by `analysis/test_governance.py`. The proof of concept applies them: personal-data tags, keyed customer keys, an erasure command and a retention cleanup (see [poc/README.md](poc/README.md)).
 
 ## Decision matrices
 

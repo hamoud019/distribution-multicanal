@@ -78,6 +78,7 @@ models:
                 to: ref('dim_product')
                 field: sku
       - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: >
           Customer key (glossary): the golden customer of the Shopify customer or of the store ticket's
           e-receipt email; "anonymous" for a store ticket without an email, "wholesale" for a wholesale order.

@@ -5,16 +5,22 @@ models:
     description: One row per Shopify customer, without contact data (only matching keys and the department).
     columns:
       - name: shopify_customer_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         data_tests: [unique, not_null]
       - name: email_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: Hash of the email in lower case without spaces (matching rule 1).
       - name: phone_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: Hash of the phone in +33 format with the first name (matching rule 2).
       - name: consent_state
+        config: {meta: {pii: consent, treatment: keep}}
         data_tests:
           - accepted_values:
               arguments:
                 values: ["subscribed", "not_subscribed", "unsubscribed"]
+      - name: department
+        config: {meta: {pii: location, treatment: generalize}}
 
   - name: stg_shopify__orders
     description: One row per Shopify order. Amounts include VAT, as Shopify sends them.
@@ -36,6 +42,10 @@ models:
               arguments:
                 to: ref('stg_erp__locations')
                 field: location_code
+      - name: shopify_customer_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: shipping_department
+        config: {meta: {pii: location, treatment: generalize}}
 
   - name: stg_shopify__order_lines
     description: One row per Shopify line item. Prices include VAT; the discount is for the whole line.

@@ -13,6 +13,7 @@ models:
         description: "Date (glossary): day the ticket was opened, Paris time."
         data_tests: [not_null]
       - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: "Customer key (glossary) of the requester; 'anonymous' when the email matches nobody."
         data_tests:
           - not_null

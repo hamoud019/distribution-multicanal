@@ -8,6 +8,7 @@ models:
       address: only the pseudonymous customer key (Part 6).
     columns:
       - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: "Customer key (glossary): pseudonymous id of the golden customer, or the member's name."
         data_tests: [unique, not_null]
       - name: customer_type
@@ -40,11 +41,14 @@ models:
               arguments:
                 values: ["Champions", "Loyal", "New", "Promising", "At risk", "Hibernating", "Needs attention", "Lost"]
       - name: marketing_consent
+        config: {meta: {pii: consent, treatment: keep}}
         description: "Marketing consent (glossary): given in Shopify or Klaviyo and withdrawn in neither."
         data_tests: [not_null]
       - name: age_band
+        config: {meta: {pii: demographic, treatment: generalize}}
         description: "Age band (glossary), from the Klaviyo birthday; 'unknown' without one."
       - name: region
+        config: {meta: {pii: location, treatment: generalize}}
         description: "Region (glossary): department of the most recent web shipping address, else of the account."
 
   - name: marketing_segments
@@ -53,6 +57,7 @@ models:
       checked every run by the test assert_marketing_segments_have_consent.
     columns:
       - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         data_tests:
           - unique
           - not_null
@@ -62,3 +67,7 @@ models:
                 field: customer_key
       - name: rfm_segment
         data_tests: [not_null]
+      - name: region
+        config: {meta: {pii: location, treatment: generalize}}
+      - name: age_band
+        config: {meta: {pii: demographic, treatment: generalize}}

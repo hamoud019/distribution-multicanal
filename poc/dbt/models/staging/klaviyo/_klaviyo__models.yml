@@ -23,16 +23,29 @@ models:
               arguments:
                 to: ref('stg_klaviyo__campaigns')
                 field: campaign_id
+      - name: klaviyo_profile_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
 
   - name: stg_klaviyo__profiles
     description: One row per Klaviyo profile, without contact data (only matching keys).
     columns:
       - name: klaviyo_profile_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         data_tests: [unique, not_null]
       - name: shopify_customer_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
         description: Set when the profile was synced from Shopify (matching rule 3).
       - name: consent_state
+        config: {meta: {pii: consent, treatment: keep}}
         data_tests:
           - accepted_values:
               arguments:
                 values: ["SUBSCRIBED", "UNSUBSCRIBED", "NEVER_SUBSCRIBED"]
+      - name: email_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: phone_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: department
+        config: {meta: {pii: location, treatment: generalize}}
+      - name: birth_year
+        config: {meta: {pii: demographic, treatment: generalize}}

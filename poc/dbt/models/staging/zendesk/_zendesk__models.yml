@@ -9,3 +9,5 @@ models:
       - name: created_date
         description: Local Paris date the ticket was opened.
         data_tests: [not_null]
+      - name: email_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}

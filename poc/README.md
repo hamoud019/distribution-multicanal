@@ -16,13 +16,14 @@ That single command:
 1. creates a virtual environment in `poc/.venv` and installs `poc/requirements.txt` (first run only, a few minutes);
 2. **generates** the synthetic sources into `poc/data/landing/` (`generate.py`);
 3. **loads** them, unchanged, into the raw layer of `poc/data/warehouse.duckdb` (`ingest.py`);
-4. runs **`dbt source freshness`**: one check per source table, so stale data is flagged before the reports are rebuilt;
-5. runs **`dbt build`**: every model and every test;
-6. runs **`dbt docs generate`**.
+4. applies the **retention periods** of `governance/retention.csv` to the raw layer (`retention.py`);
+5. runs **`dbt source freshness`**: one check per source table, so stale data is flagged before the reports are rebuilt;
+6. runs **`dbt build`**: every model and every test;
+7. runs **`dbt docs generate`**.
 
 Then `py -3.12 poc/run.py --docs` opens the dbt documentation in the browser, with the **lineage graph** from each source to the report table.
 
-Other options: `--incremental` keeps the warehouse and loads only new or changed files (a changed file replaces the rows it loaded before); `--scale 0.1` makes a smaller dataset for a quick run.
+Other options: `--incremental` keeps the warehouse and loads only new or changed files (a changed file replaces the rows it loaded before); `--scale 0.1` makes a smaller dataset for a quick run; `--erase EMAIL` erases one person from every layer (see GDPR controls below).
 
 The script always runs inside `poc/.venv` with the pinned versions, even if another dbt is installed on the computer.
 
@@ -149,7 +150,7 @@ The second use case (issue #11), in `dbt/models/marts/customer`, with the suppor
 2. they have the **same phone** in +33 format **and the same first name**;
 3. one stores the other's id (a Klaviyo profile synced from Shopify).
 
-Records joined directly or through other records are one golden customer. Its customer key is a hash; issue #14 will add a secret salt in the one macro every key goes through (`dbt/macros/identity.sql`). Matching only ever sees **hashes** of the emails and phones: they stay in the raw layer. `intermediate.int_customers__matches` keeps one row per pair and rule, so a data steward can see why two records were merged (story 26). Rule 4 of Part 6 (same name and postcode) is never automatic and is not in the PoC.
+Records joined directly or through other records are one golden customer. Its customer key is a hash made with a secret key (see GDPR controls), in the one macro every key goes through (`dbt/macros/identity.sql`). Matching only ever sees **hashes** of the emails and phones: they stay in the raw layer. `intermediate.int_customers__matches` keeps one row per pair and rule, so a data steward can see why two records were merged (story 26). Rule 4 of Part 6 (same name and postcode) is never automatic and is not in the PoC.
 
 The phone rule asks for the first name too: **a family sharing one phone is not merged**. Part 6 said "same phone" only, but a wrong merge is worse than a missed one, so Part 6 was updated. The spec mentions a loyalty id: Le Slip Français has no loyalty card, and rule 3 (source id link) plays that part.
 
@@ -196,7 +197,26 @@ The rules, from the glossary of [Part 6](../docs/deliverables/06-governance-gdpr
 - **Social**: impressions are Instagram and Facebook impressions and TikTok video views; engagement is Instagram's interactions, Facebook's post engagements and TikTok's likes, comments and shares. The account insights carry no campaign, so campaigns are compared with social results by period.
 - **Support quality**: each Zendesk ticket carries the order number and the product the agent filled in. The order gives the **sales channel** (a Shopify order name for Web, a till ticket number for Store); the product comes from the ERP. The **CSAT rate** counts only tickets with a survey answer.
 
-**On the generated data**, the campaigns have a 30 % open rate and a 3 % click rate, and 64 web orders (4.5 k€) are attributed to them: in the synthetic data, clicks and orders are drawn apart, so this figure is low. The web funnel converts 2 % of sessions, as in Part 0, with a consent rate of 65 % on average; 634 rows of visitors who refused are dropped.
+**On the generated data**, the campaigns have a 30 % open rate and a 3 % click rate, and 64 web orders (4.5 k€) are attributed to them: in the synthetic data, clicks and orders are drawn apart, so this figure is low. The web funnel converts 2 % of sessions, as in Part 0, with a consent rate of 65 % on average; 444 rows of visitors who refused are dropped. The table starts in December 2023: web data is kept 25 months (see GDPR controls).
+
+### GDPR controls
+
+The rules of [Part 6](../docs/deliverables/06-governance-gdpr.md) applied to the proof of concept (issue #14).
+
+**Personal data is tagged.** Every column that holds personal data, or a key made from it, carries its Part 6 category and treatment in the dbt metadata (`config: meta: {pii, treatment}`), from the raw tables (`_sources.yml`) to the marts: 46 columns. The raw JSON records and the e-receipt email are `restrict`; the keys and source ids are `pseudonymize`; region and age band are `generalize`; consent is `keep`. The tags are in the dbt docs, and a test checks that only pseudonymized, generalized or kept data reaches a mart.
+
+**Customer keys need a secret key.** Every customer key, and every hash of an email or a phone, is a SHA-256 of a secret key followed by the value (`pseudonymize` in `dbt/macros/identity.sql`). Without the key, nobody can recompute a customer key from a Shopify id or an email, even though those are easy to guess. `run.py` writes a random key once to `poc/data/pseudonymization.key` (never committed) and passes it to dbt; dbt stops if the key is missing rather than hash without it. In production the key lives in the cloud key vault.
+
+**Right to erasure.** `py -3.12 poc/run.py --erase someone@example.com` follows the steps of `governance/erasure_steps.csv` that happen inside the platform (`erase.py`):
+
+1. find every record of the person through the golden customer (their Shopify customers, Klaviyo profiles, till tickets and Zendesk tickets);
+2. put the hashes of their emails, phones and source ids on the **erasure suppression list** (`raw_meta.erasure_suppression`): the staging models drop or anonymize them, so data a tool sends again never comes back;
+3. in the raw layer, delete the Shopify customers, Klaviyo profiles and email events, and **anonymize** the orders, till tickets and support tickets: they stay (accounting, statistics) without the email, name, address, customer id or free text;
+4. rebuild the dbt layers: the person's sales move to the `anonymous` customer key, so the **sales totals do not change**.
+
+Deleting the person in the tools themselves, Power BI and the backups (steps 4 and 9 to 12) are outside the proof of concept. A full `run.py` starts over from fresh synthetic sources, where the person was never erased; erasure is kept across `--incremental` runs.
+
+**Retention.** After each load, `retention.py` applies `governance/retention.csv` to the raw layer, as of the last day of the synthetic data (31 December 2025, the proof of concept's "today"). Past its period a row is deleted, or, where the law keeps the record but not the person, only the identity is removed: orders and till tickets stay 10 years, but lose the customer after 3. On the generated data, only web analytics is old enough today: the days before December 2023 are deleted (25 months). The other rules show when the cleanup date is moved forward (the tests use mid-2029). A record without the date its period counts from is kept: a Shopify customer or Klaviyo profile without any order or email activity, and the ERP items.
 
 ## Dashboard
 
@@ -237,6 +257,7 @@ poc/.venv/bin/python -m unittest discover poc/tests           # macOS / Linux
 - `test_ingest.py`: every record is loaded unchanged with its metadata, a second run loads only new files, a changed file replaces its old rows, and paths with an apostrophe work.
 - `test_pipeline.py`: `dbt build` is green, the store sales match the tills, a Z report one cent off is caught, all 20 freshness checks pass, and a late source is flagged against its own schedule (2 hours late is a warning for the tills but fine for the ERP; 4 days late is an error for web analytics).
   For the sales mart, against the generated source files: the net revenue of the mart is the store plus web net sales of the files; it reconciles with the ERP ledger, and a ledger month 0.6 % off is caught; every click-and-collect order is credited to its store; every return is on its refund day and lowers net revenue; the monthly table carries the right previous month and last year; and the mart has every column planned in `governance/marts.csv`.
+- `test_gdpr.py`: personal data is tagged, and only pseudonymized, generalized or kept data reaches the marts; no mart column tagged as personal data holds an email, phone or name of the source files; a customer key cannot be recomputed from a guessable id without the secret key; consent changed in the source files reaches the segments (an unsubscribe takes a customer out, a new subscription brings one in); after erasure of a person (email typed in capitals with spaces), the build and its tests pass, the person is in no raw, staging, intermediate or mart table, the sales totals are the same, and data Shopify sends again does not come back past the raw layer; after the retention cleanup (as of mid-2029) the build passes, web analytics older than 25 months is gone, orders stay but lose the customer, old support tickets and email activity are gone; and every rule of `retention.py` matches `governance/retention.csv`.
 - `test_marketing_mart.py`: the marketing mart and support quality, against the source files, with a test campaign and a ticket about a store purchase added to them. The campaign counts only the order placed 2 days after a click, not the one 6 days after, not one before the click, and not one after a simple open; no order counts for two campaigns; the sessions of the mart are exactly the sessions of visitors who accepted cookies, and the consent rate is the banner's; social figures match the files; each ticket has the order, channel and SKU of its fields; support quality adds up the tickets, CSAT answers and reply times per month, channel and product; and the marts have every column planned in `governance/marts.csv`.
 - `test_customer_mart.py`: the customer mart, against the source files, with a household and a person under a second email added to them. Records sharing an email typed in another case or with spaces are one golden customer, in the sales and in support; a family sharing one phone is not merged; the same phone and first name are merged, and an unsubscribe in Klaviyo then removes the customer from the segments; customers who never consented or withdrew are not in the marketing segments; every sales row has a golden customer or the `anonymous` or `wholesale` member; omnichannel customers bought both online and in store; RFM segments follow the rules above; no email or phone reaches any mart; and `dim_customer` has every column planned in `governance/marts.csv`.
 - `test_inventory_mart.py`: the inventory mart, against the source files, with a few stock levels changed in the ERP files to set up each case. A SKU with zero stock that sold is a stockout; a store's cover counts the web orders collected there, not only its till sales, and the warehouse's demand is the web and wholesale units it ships; a cover just above 180 days is overstock and one at or below it is not; stock that sold nothing is a slow mover, not an overstock; on every row, stock, demand, cover, sell-through and the four flags follow the glossary; production matches the ERP production orders; and the mart has every column planned in `governance/marts.csv`.

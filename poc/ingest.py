@@ -109,6 +109,9 @@ def ingest(landing, warehouse):
         con.execute("""create table if not exists raw_meta.load_log (
             file varchar, sha256 varchar, source varchar, table_name varchar,
             batch_id varchar, loaded_at timestamptz, row_count bigint)""")
+        # The erasure suppression list (Part 6, section 4, step 3), filled by poc/erase.py: keyed hashes only
+        con.execute("""create table if not exists raw_meta.erasure_suppression (
+            key_hash varchar, kind varchar, request_id varchar, requested_at timestamptz)""")
         done = set(con.execute("select file, sha256 from raw_meta.load_log").fetchall())
         for ds in DATASETS:
             files = sorted(landing.glob(ds.pattern))

@@ -1,0 +1,53 @@
+version: 2
+
+# The golden customer's building blocks hold the source ids and the matching keys of every person: they stay
+# in the intermediate layer, which only the data engineer can read (Part 6, section 5).
+
+models:
+  - name: int_customers__records
+    description: Every record of a person in the source tools, before matching, with its matching keys.
+    columns:
+      - name: record_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+        data_tests: [unique, not_null]
+      - name: source_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: email_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: phone_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+
+  - name: int_customers__matches
+    description: One row per pair of records joined by a matching rule, and the rule.
+    columns:
+      - name: record_a
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: record_b
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+
+  - name: int_customers__identity_map
+    description: The golden customer of each source record (the "golden-customer mapping" of the erasure steps).
+    columns:
+      - name: record_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+        data_tests: [unique, not_null]
+      - name: source_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: golden_id
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+      - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+        data_tests: [not_null]
+
+  - name: int_customers__golden
+    description: One row per golden customer, with the values that survive the merge.
+    columns:
+      - name: customer_key
+        config: {meta: {pii: identifier, treatment: pseudonymize}}
+        data_tests: [unique, not_null]
+      - name: region
+        config: {meta: {pii: location, treatment: generalize}}
+      - name: birth_year
+        config: {meta: {pii: demographic, treatment: generalize}}
+      - name: marketing_consent
+        config: {meta: {pii: consent, treatment: keep}}
