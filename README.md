@@ -8,6 +8,7 @@ Spec and work breakdown: issue #1.
 
 | # | Deliverable | Issue |
 |---|---|---|
+| – | [Executive summary](docs/deliverables/executive-summary.md): the decision, its cost, the plan and what we ask the steering committee | #1 |
 | 0 | [Our company: Le Slip Français](docs/deliverables/00-company-profile.md) | |
 | 1 | [Choosing the architecture](docs/deliverables/01-architecture-options.md) | #2 |
 | 2 | [SWOT and risk assessment](docs/deliverables/02-swot-risks.md) | #4 |
